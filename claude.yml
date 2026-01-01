@@ -164,9 +164,9 @@ lvgl:
         # PV -> Home (vertikal runter, dann horizontal rechts ins Haus)
         - line:
             points:
-              - 260, 130
+              - 260, 120
               - 260, 220
-              - 350, 220
+              - 360, 220
             line_color: 0x332211
             line_width: 3
             line_rounded: false
@@ -183,9 +183,9 @@ lvgl:
         # Batterie -> Home (vertikal hoch, dann horizontal rechts ins Haus)
         - line:
             points:
-              - 260, 350
+              - 260, 360
               - 260, 260
-              - 350, 260
+              - 360, 260
             line_color: 0x004422
             line_width: 3
             line_rounded: false
@@ -193,9 +193,9 @@ lvgl:
         # Grid -> Batterie (horizontal rechts, dann vertikal runter)
         - line:
             points:
-              - 130, 260
+              - 120, 260
               - 220, 260
-              - 220, 350
+              - 220, 360
             line_color: 0x444444
             line_width: 3
             line_rounded: false
@@ -203,9 +203,9 @@ lvgl:
         # Grid -> PV (horizontal rechts, dann vertikal hoch)
         - line:
             points:
-              - 130, 220
+              - 120, 220
               - 220, 220
-              - 220, 130
+              - 220, 120
             line_color: 0x332244
             line_width: 3
             line_rounded: false
