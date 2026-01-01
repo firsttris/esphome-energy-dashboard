@@ -166,7 +166,7 @@ lvgl:
             points:
               - 260, 130
               - 260, 220
-              - 310, 220
+              - 350, 220
             line_color: 0x332211
             line_width: 3
             line_rounded: false
@@ -175,7 +175,7 @@ lvgl:
         - line:
             points:
               - 130, 240
-              - 310, 240
+              - 350, 240
             line_color: 0x223344
             line_width: 3
             line_rounded: false
@@ -185,7 +185,7 @@ lvgl:
             points:
               - 260, 350
               - 260, 260
-              - 310, 260
+              - 350, 260
             line_color: 0x332233
             line_width: 3
             line_rounded: false
@@ -222,8 +222,8 @@ lvgl:
         # Gas -> Home (vertikal nach unten)
         - line:
             points:
-              - 360, 130
-              - 360, 190
+              - 400, 130
+              - 400, 190
             line_color: 0x332211
             line_width: 3
             line_rounded: false
@@ -231,8 +231,8 @@ lvgl:
         # Wasser -> Home (vertikal nach oben)
         - line:
             points:
-              - 360, 350
-              - 360, 290
+              - 400, 350
+              - 400, 290
             line_color: 0x223344
             line_width: 3
             line_rounded: false
@@ -381,7 +381,7 @@ lvgl:
               - label:
                   align: CENTER
                   y: -15
-                  text: "\U000F0239"
+                  text: "\U000F06A5"
                   text_font: icons_32
                   text_color: 0x00BBFF
               
@@ -403,7 +403,7 @@ lvgl:
         # === HOME (Rechts Mitte) ===
         - obj:
             id: home_circle
-            x: 310
+            x: 350
             y: 190
             width: 100
             height: 100
@@ -475,7 +475,7 @@ lvgl:
         # === GAS (Rechts Oben) ===
         - obj:
             id: gas_circle
-            x: 310
+            x: 350
             y: 30
             width: 100
             height: 100
@@ -489,7 +489,7 @@ lvgl:
               - label:
                   align: CENTER
                   y: -15
-                  text: "\U000F02E4"
+                  text: "\U000F0238"
                   text_font: icons_32
                   text_color: 0xFF6666
               
@@ -504,14 +504,14 @@ lvgl:
               - label:
                   align: CENTER
                   y: 28
-                  text: "m³"
+                  text: "m3"
                   text_font: roboto_12
                   text_color: 0x888888
         
         # === WASSER (Rechts Unten) ===
         - obj:
             id: water_circle
-            x: 310
+            x: 350
             y: 350
             width: 100
             height: 100
@@ -540,7 +540,7 @@ lvgl:
               - label:
                   align: CENTER
                   y: 28
-                  text: "m³"
+                  text: "m3"
                   text_font: roboto_12
                   text_color: 0x888888
 
@@ -563,10 +563,10 @@ font:
     size: 32
     glyphs: [
       "\U000F0A72",  # solar-power
-      "\U000F0239",  # transmission-tower
+      "\U000F06A5",  # power-plug (Grid)
       "\U000F02DC",  # home
       "\U000F0079",  # battery
-      "\U000F02E4",  # fire (gas)
+      "\U000F0238",  # flame (Gas)
       "\U000F058C",  # water
     ]
 
@@ -645,7 +645,7 @@ interval:
           static int water_pos = 0;
           
           // PV Flow (eckig: vertikal runter, dann horizontal rechts ins Haus)
-          pv_pos = (pv_pos + 2) % 160;
+          pv_pos = (pv_pos + 2) % 180;
           if (pv_pos < 90) {
             // Vertikal nach unten
             lv_obj_set_x(id(flow_pv), 258);
@@ -662,14 +662,14 @@ interval:
           }
           
           // Grid Flow (horizontal zu Home)
-          grid_pos = (grid_pos + 2) % 180;
+          grid_pos = (grid_pos + 2) % 220;
           lv_obj_set_x(id(flow_grid), 130 + grid_pos);
           lv_obj_set_y(id(flow_grid), 238);
           lv_obj_set_width(id(flow_grid), 15);
           lv_obj_set_height(id(flow_grid), 4);
           
           // Battery Flow (eckig: vertikal hoch, dann horizontal rechts ins Haus)
-          battery_pos = (battery_pos + 2) % 160;
+          battery_pos = (battery_pos + 2) % 180;
           if (battery_pos < 90) {
             // Vertikal nach oben
             lv_obj_set_x(id(flow_battery), 258);
@@ -691,14 +691,14 @@ interval:
           
           // Gas Flow (vertikal nach unten zu Home)
           gas_pos = (gas_pos + 2) % 60;
-          lv_obj_set_x(id(flow_gas), 358);
+          lv_obj_set_x(id(flow_gas), 398);
           lv_obj_set_y(id(flow_gas), 130 + gas_pos);
           lv_obj_set_width(id(flow_gas), 4);
           lv_obj_set_height(id(flow_gas), 15);
           
           // Water Flow (vertikal nach oben zu Home)
           water_pos = (water_pos + 2) % 60;
-          lv_obj_set_x(id(flow_water), 358);
+          lv_obj_set_x(id(flow_water), 398);
           lv_obj_set_y(id(flow_water), 350 - water_pos);
           lv_obj_set_width(id(flow_water), 4);
           lv_obj_set_height(id(flow_water), 15);
