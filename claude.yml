@@ -186,6 +186,182 @@ lvgl:
             text_font: roboto_32
             text_color: 0x4488FF
         
+        # === Energiefluss Linien mit Kurven (transparente Linien) ===
+        # Solar -> Mitte (nach unten, dann rechts mit Kurve)
+        - line:
+            id: line_solar_v
+            points:
+              - 100, 190
+              - 100, 230
+            line_color: 0x003300
+            line_width: 4
+        - line:
+            id: line_solar_curve
+            points:
+              - 100, 230
+              - 110, 235
+              - 120, 238
+            line_color: 0x003300
+            line_width: 4
+        - line:
+            id: line_solar_h
+            points:
+              - 120, 238
+              - 210, 238
+            line_color: 0x003300
+            line_width: 4
+        
+        # Mitte -> Grid (nach rechts, dann hoch mit Kurve)
+        - line:
+            id: line_grid_h
+            points:
+              - 270, 220
+              - 360, 220
+            line_color: 0x330000
+            line_width: 4
+        - line:
+            id: line_grid_curve
+            points:
+              - 360, 220
+              - 370, 210
+              - 378, 195
+            line_color: 0x330000
+            line_width: 4
+        - line:
+            id: line_grid_v
+            points:
+              - 378, 195
+              - 378, 190
+            line_color: 0x330000
+            line_width: 4
+        
+        # Mitte -> Home (direkt horizontal)
+        - line:
+            id: line_home
+            points:
+              - 270, 260
+              - 330, 260
+            line_color: 0x003300
+            line_width: 4
+        
+        # Battery -> Mitte (nach oben, dann rechts mit Kurve)
+        - line:
+            id: line_battery_v
+            points:
+              - 100, 330
+              - 100, 285
+            line_color: 0x002244
+            line_width: 4
+        - line:
+            id: line_battery_curve
+            points:
+              - 100, 285
+              - 110, 278
+              - 120, 275
+            line_color: 0x002244
+            line_width: 4
+        - line:
+            id: line_battery_h
+            points:
+              - 120, 275
+              - 210, 275
+            line_color: 0x002244
+            line_width: 4
+        
+        # Mitte -> Backup (nach rechts, dann runter mit Kurve)
+        - line:
+            id: line_backup_h
+            points:
+              - 270, 295
+              - 360, 295
+            line_color: 0x003300
+            line_width: 4
+        - line:
+            id: line_backup_curve
+            points:
+              - 360, 295
+              - 370, 305
+              - 378, 320
+            line_color: 0x003300
+            line_width: 4
+        - line:
+            id: line_backup_v
+            points:
+              - 378, 320
+              - 378, 330
+            line_color: 0x003300
+            line_width: 4
+        
+        # Animierte Energiefluss-Segmente (leuchtende Teile)
+        - obj:
+            id: flow_segment_solar
+            x: 100
+            y: 190
+            width: 4
+            height: 20
+            bg_color: 0x00FF00
+            radius: 2
+            border_width: 0
+        
+        - obj:
+            id: flow_segment_grid
+            x: 270
+            y: 218
+            width: 20
+            height: 4
+            bg_color: 0xFF0000
+            radius: 2
+            border_width: 0
+        
+        - obj:
+            id: flow_segment_battery
+            x: 100
+            y: 310
+            width: 4
+            height: 20
+            bg_color: 0x3399FF
+            radius: 2
+            border_width: 0
+        
+        - obj:
+            id: flow_segment_home
+            x: 270
+            y: 258
+            width: 20
+            height: 4
+            bg_color: 0x00FF00
+            radius: 2
+            border_width: 0
+        
+        - obj:
+            id: flow_segment_backup
+            x: 270
+            y: 293
+            width: 20
+            height: 4
+            bg_color: 0x00FF00
+            radius: 2
+            border_width: 0
+        
+        # === LEAF ICON Mitte mit Border ===
+        - obj:
+            id: center_circle
+            align: CENTER
+            x: 0
+            y: 0
+            width: 70
+            height: 70
+            bg_color: 0x001100
+            border_color: 0x00AA44
+            border_width: 3
+            radius: 35
+            widgets:
+              - label:
+                  align: CENTER
+                  text: "\U000F0DEE"
+                  text_font: icons_48
+                  text_color: 0x00DD66
+        
         # === SOLAR (Links Oben) ===
         - obj:
             id: solar_circle
@@ -198,6 +374,8 @@ lvgl:
             border_width: 3
             radius: 50
             pad_all: 5
+            scrollbar_mode: "off"
+            clickable: false
             widgets:
               - arc:
                   id: solar_arc
@@ -250,6 +428,8 @@ lvgl:
             border_color: 0xFF0000
             border_width: 3
             radius: 50
+            scrollbar_mode: "off"
+            clickable: false
             widgets:
               - arc:
                   id: grid_arc
@@ -309,6 +489,8 @@ lvgl:
             border_color: 0x00FF00
             border_width: 3
             radius: 50
+            scrollbar_mode: "off"
+            clickable: false
             widgets:
               - arc:
                   id: home_arc
@@ -359,6 +541,8 @@ lvgl:
             border_color: 0x3399FF
             border_width: 3
             radius: 50
+            scrollbar_mode: "off"
+            clickable: false
             widgets:
               - arc:
                   id: battery_arc
@@ -409,6 +593,8 @@ lvgl:
             border_color: 0x00FF00
             border_width: 3
             radius: 50
+            scrollbar_mode: "off"
+            clickable: false
             widgets:
               - arc:
                   id: backup_arc
@@ -578,3 +764,112 @@ interval:
               return (int)id(battery_soc).state;
             }
             return 0;
+
+  # Animation für Energiefluss-Segmente (transparente Linien mit leuchtendem Teil)
+  - interval: 50ms
+    then:
+      - lambda: |-
+          static int solar_pos = 0;
+          static int grid_pos = 0;
+          static int battery_pos = 0;
+          static int home_pos = 0;
+          static int backup_pos = 0;
+          
+          // Solar Segment Animation (vertical runter -> horizontal rechts)
+          solar_pos = (solar_pos + 3) % 130;
+          if (solar_pos < 40) {
+            // Vertikal runter
+            lv_obj_set_x(id(flow_segment_solar), 98);
+            lv_obj_set_y(id(flow_segment_solar), 190 + solar_pos);
+            lv_obj_set_width(id(flow_segment_solar), 4);
+            lv_obj_set_height(id(flow_segment_solar), 20);
+          } else if (solar_pos < 48) {
+            // Kurve
+            int curve = solar_pos - 40;
+            lv_obj_set_x(id(flow_segment_solar), 98 + curve * 2);
+            lv_obj_set_y(id(flow_segment_solar), 230 + curve);
+            lv_obj_set_width(id(flow_segment_solar), 4);
+            lv_obj_set_height(id(flow_segment_solar), 4);
+          } else {
+            // Horizontal rechts
+            lv_obj_set_x(id(flow_segment_solar), 120 + (solar_pos - 48) * 1.1);
+            lv_obj_set_y(id(flow_segment_solar), 236);
+            lv_obj_set_width(id(flow_segment_solar), 20);
+            lv_obj_set_height(id(flow_segment_solar), 4);
+          }
+          
+          // Grid Segment Animation (horizontal rechts -> vertical hoch)
+          grid_pos = (grid_pos + 3) % 120;
+          if (grid_pos < 90) {
+            // Horizontal rechts
+            lv_obj_set_x(id(flow_segment_grid), 270 + grid_pos);
+            lv_obj_set_y(id(flow_segment_grid), 218);
+            lv_obj_set_width(id(flow_segment_grid), 20);
+            lv_obj_set_height(id(flow_segment_grid), 4);
+          } else if (grid_pos < 105) {
+            // Kurve
+            int curve = grid_pos - 90;
+            lv_obj_set_x(id(flow_segment_grid), 360 + curve);
+            lv_obj_set_y(id(flow_segment_grid), 218 - curve);
+            lv_obj_set_width(id(flow_segment_grid), 4);
+            lv_obj_set_height(id(flow_segment_grid), 4);
+          } else {
+            // Vertikal hoch
+            lv_obj_set_x(id(flow_segment_grid), 376);
+            lv_obj_set_y(id(flow_segment_grid), 195 - (grid_pos - 105) * 0.3);
+            lv_obj_set_width(id(flow_segment_grid), 4);
+            lv_obj_set_height(id(flow_segment_grid), 20);
+          }
+          
+          // Battery Segment Animation (vertical hoch -> horizontal rechts)
+          battery_pos = (battery_pos + 3) % 130;
+          if (battery_pos < 45) {
+            // Vertikal hoch
+            lv_obj_set_x(id(flow_segment_battery), 98);
+            lv_obj_set_y(id(flow_segment_battery), 330 - battery_pos);
+            lv_obj_set_width(id(flow_segment_battery), 4);
+            lv_obj_set_height(id(flow_segment_battery), 20);
+          } else if (battery_pos < 53) {
+            // Kurve
+            int curve = battery_pos - 45;
+            lv_obj_set_x(id(flow_segment_battery), 98 + curve * 2);
+            lv_obj_set_y(id(flow_segment_battery), 285 - curve);
+            lv_obj_set_width(id(flow_segment_battery), 4);
+            lv_obj_set_height(id(flow_segment_battery), 4);
+          } else {
+            // Horizontal rechts
+            lv_obj_set_x(id(flow_segment_battery), 120 + (battery_pos - 53) * 1.1);
+            lv_obj_set_y(id(flow_segment_battery), 273);
+            lv_obj_set_width(id(flow_segment_battery), 20);
+            lv_obj_set_height(id(flow_segment_battery), 4);
+          }
+          
+          // Home Segment Animation (direkt horizontal)
+          home_pos = (home_pos + 3) % 60;
+          lv_obj_set_x(id(flow_segment_home), 270 + home_pos);
+          lv_obj_set_y(id(flow_segment_home), 258);
+          lv_obj_set_width(id(flow_segment_home), 20);
+          lv_obj_set_height(id(flow_segment_home), 4);
+          
+          // Backup Segment Animation (horizontal rechts -> vertical runter)
+          backup_pos = (backup_pos + 3) % 120;
+          if (backup_pos < 90) {
+            // Horizontal rechts
+            lv_obj_set_x(id(flow_segment_backup), 270 + backup_pos);
+            lv_obj_set_y(id(flow_segment_backup), 293);
+            lv_obj_set_width(id(flow_segment_backup), 20);
+            lv_obj_set_height(id(flow_segment_backup), 4);
+          } else if (backup_pos < 105) {
+            // Kurve
+            int curve = backup_pos - 90;
+            lv_obj_set_x(id(flow_segment_backup), 360 + curve);
+            lv_obj_set_y(id(flow_segment_backup), 293 + curve);
+            lv_obj_set_width(id(flow_segment_backup), 4);
+            lv_obj_set_height(id(flow_segment_backup), 4);
+          } else {
+            // Vertikal runter
+            lv_obj_set_x(id(flow_segment_backup), 376);
+            lv_obj_set_y(id(flow_segment_backup), 320 + (backup_pos - 105) * 0.7);
+            lv_obj_set_width(id(flow_segment_backup), 4);
+            lv_obj_set_height(id(flow_segment_backup), 20);
+          }
