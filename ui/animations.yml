@@ -113,28 +113,50 @@ interval:
           static int water_pos = 0;
           
           // PV Flow (eckig: vertikal runter, dann horizontal rechts ins Haus)
-          pv_pos = (pv_pos + 2) % 215;
-          if (pv_pos < 75) {
-            // Vertikal nach unten
-            lv_obj_set_x(id(flow_pv), 258);
-            lv_obj_set_y(id(flow_pv), 130 + pv_pos);
-            lv_obj_set_width(id(flow_pv), 4);
-            lv_obj_set_height(id(flow_pv), 15);
+          // Nur animieren wenn PV-Leistung > 0
+          bool show_pv_home = false;
+          if (id(solar_power).has_state() && !isnan(id(solar_power).state)) {
+            show_pv_home = id(solar_power).state > 0.0;
+          }
+          
+          if (show_pv_home) {
+            lv_obj_clear_flag(id(flow_pv), LV_OBJ_FLAG_HIDDEN);
+            pv_pos = (pv_pos + 2) % 215;
+            if (pv_pos < 75) {
+              // Vertikal nach unten
+              lv_obj_set_x(id(flow_pv), 258);
+              lv_obj_set_y(id(flow_pv), 130 + pv_pos);
+              lv_obj_set_width(id(flow_pv), 4);
+              lv_obj_set_height(id(flow_pv), 15);
+            } else {
+              // Horizontal nach rechts ins Haus
+              int c = pv_pos - 75;
+              lv_obj_set_x(id(flow_pv), 260 + c);
+              lv_obj_set_y(id(flow_pv), 218);
+              lv_obj_set_width(id(flow_pv), 15);
+              lv_obj_set_height(id(flow_pv), 4);
+            }
           } else {
-            // Horizontal nach rechts ins Haus
-            int c = pv_pos - 75;
-            lv_obj_set_x(id(flow_pv), 260 + c);
-            lv_obj_set_y(id(flow_pv), 218);
-            lv_obj_set_width(id(flow_pv), 15);
-            lv_obj_set_height(id(flow_pv), 4);
+            lv_obj_add_flag(id(flow_pv), LV_OBJ_FLAG_HIDDEN);
           }
           
           // Grid Flow (horizontal zu Home)
-          grid_pos = (grid_pos + 2) % 270;
-          lv_obj_set_x(id(flow_grid), 130 + grid_pos);
-          lv_obj_set_y(id(flow_grid), 238);
-          lv_obj_set_width(id(flow_grid), 15);
-          lv_obj_set_height(id(flow_grid), 4);
+          // Nur animieren wenn Netzbezug > 0
+          bool show_grid_home = false;
+          if (id(grid_power).has_state() && !isnan(id(grid_power).state)) {
+            show_grid_home = id(grid_power).state > 0.0;
+          }
+          
+          if (show_grid_home) {
+            lv_obj_clear_flag(id(flow_grid), LV_OBJ_FLAG_HIDDEN);
+            grid_pos = (grid_pos + 2) % 270;
+            lv_obj_set_x(id(flow_grid), 130 + grid_pos);
+            lv_obj_set_y(id(flow_grid), 238);
+            lv_obj_set_width(id(flow_grid), 15);
+            lv_obj_set_height(id(flow_grid), 4);
+          } else {
+            lv_obj_add_flag(id(flow_grid), LV_OBJ_FLAG_HIDDEN);
+          }
           
           // Battery Flow (eckig: vertikal hoch, dann horizontal rechts ins Haus)
           // Nur animieren wenn Batterieentladung > 0

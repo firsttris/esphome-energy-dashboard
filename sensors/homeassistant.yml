@@ -2,11 +2,6 @@
 
 # Globale Variablen
 globals:
-  - id: battery_capacity_kwh
-    type: float
-    restore_value: no
-    initial_value: '13.0'  # Akkukapazität in kWh (anpassbar)
-  
   - id: ha_connected
     type: bool
     restore_value: no
