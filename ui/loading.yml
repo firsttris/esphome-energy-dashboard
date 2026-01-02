@@ -1,0 +1,42 @@
+# Loading Screen
+
+globals:
+  - id: ha_connected
+    type: bool
+    initial_value: 'false'
+
+script:
+  - id: on_ha_connected
+    then:
+      - lambda: |-
+          if (!id(ha_connected)) {
+            id(ha_connected) = true;
+            id(start_loading_animation).execute();
+          }
+
+  - id: start_loading_animation
+    then:
+      - lambda: |-
+          lv_obj_add_flag(id(loading_spinner), LV_OBJ_FLAG_HIDDEN);
+      - lambda: |-
+          lv_label_set_text(id(loading_status), "Verbunden!");
+          lv_obj_set_style_text_color(id(loading_status), lv_color_hex(0x00FF99), 0);
+      
+      - delay: 300ms
+      - lambda: |-
+          lv_label_set_text(id(loading_status), "Lade Daten...");
+      
+      - lambda: |-
+          lv_bar_set_value(id(loading_bar), 33, LV_ANIM_ON);
+      - delay: 400ms
+      
+      - lambda: |-
+          lv_bar_set_value(id(loading_bar), 66, LV_ANIM_ON);
+      - delay: 400ms
+      
+      - lambda: |-
+          lv_bar_set_value(id(loading_bar), 100, LV_ANIM_ON);
+      - delay: 500ms
+      
+      - lambda: |-
+          lv_obj_add_flag(id(loading_overlay), LV_OBJ_FLAG_HIDDEN);

@@ -10,6 +10,74 @@ lvgl:
   touchscreens:
     - tft_touch
   
+  # Loading Overlay (Top Layer)
+  top_layer:
+    widgets:
+      - obj:
+          id: loading_overlay
+          width: 480
+          height: 480
+          bg_color: 0x0a0a0a
+          border_width: 0
+          radius: 0
+          widgets:
+            # Energy Icon
+            - label:
+                align: CENTER
+                y: -80
+                text: "\U000F0A72"
+                text_font: icons_32
+                text_color: 0xFFBB33
+            
+            # App Name
+            - label:
+                align: CENTER
+                y: -30
+                text: "Energie Dashboard"
+                text_font: roboto_16
+                text_color: 0xFFFFFF
+            
+            # Status Text
+            - label:
+                id: loading_status
+                align: CENTER
+                y: 20
+                text: "Verbinde..."
+                text_font: roboto_14
+                text_color: 0x888888
+            
+            # Spinner
+            - spinner:
+                id: loading_spinner
+                align: CENTER
+                y: 60
+                width: 40
+                height: 40
+                spin_time: 1.5s
+                arc_length: 90deg
+                arc_width: 4
+                arc_color: 0x333333
+                indicator:
+                  arc_color: 0x00BBFF
+                  arc_width: 4
+            
+            # Progress Bar
+            - bar:
+                id: loading_bar
+                align: CENTER
+                y: 120
+                width: 280
+                height: 8
+                value: 0
+                min_value: 0
+                max_value: 100
+                bg_color: 0x222222
+                border_width: 0
+                radius: 4
+                indicator:
+                  bg_color: 0x00FF99
+                  radius: 4
+  
   # Widgets
   pages:
     - id: main_page
