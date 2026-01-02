@@ -15,19 +15,24 @@ interval:
             return "0.00";
       
       - lvgl.label.update:
-          id: grid_value
+          id: grid_bezug_label
           text: !lambda |-
-            float bezug = 0.0;
-            float einspeisung = 0.0;
             if (id(grid_power).has_state() && !isnan(id(grid_power).state)) {
-              bezug = id(grid_power).state;
+              static char buf[20];
+              snprintf(buf, sizeof(buf), "%6.2f kWh", id(grid_power).state);
+              return buf;
             }
+            return "  0.00 kWh";
+      
+      - lvgl.label.update:
+          id: grid_einspeisung_label
+          text: !lambda |-
             if (id(grid_feed_in).has_state() && !isnan(id(grid_feed_in).state)) {
-              einspeisung = id(grid_feed_in).state;
+              static char buf[20];
+              snprintf(buf, sizeof(buf), "%6.2f kWh", id(grid_feed_in).state);
+              return buf;
             }
-            static char buf[100];
-            snprintf(buf, sizeof(buf), "%.2f / #BB33FF %.2f#", bezug, einspeisung);
-            return buf;
+            return "  0.00 kWh";
       
       - lvgl.label.update:
           id: home_value
@@ -40,15 +45,24 @@ interval:
             return "0.00";
       
       - lvgl.label.update:
-          id: battery_value
+          id: battery_charge_label
           text: !lambda |-
-            if (id(battery_soc).has_state() && !isnan(id(battery_soc).state)) {
-              float available_kwh = id(battery_capacity_kwh) * (id(battery_soc).state / 100.0);
-              static char buf[12];
-              snprintf(buf, sizeof(buf), "%.1f kWh", available_kwh);
+            if (id(battery_charge).has_state() && !isnan(id(battery_charge).state)) {
+              static char buf[20];
+              snprintf(buf, sizeof(buf), "%.2f kWh", id(battery_charge).state);
               return buf;
             }
-            return "0.0 kWh";
+            return "0.00 kWh";
+      
+      - lvgl.label.update:
+          id: battery_discharge_label
+          text: !lambda |-
+            if (id(battery_discharge).has_state() && !isnan(id(battery_discharge).state)) {
+              static char buf[20];
+              snprintf(buf, sizeof(buf), "%.2f kWh", id(battery_discharge).state);
+              return buf;
+            }
+            return "0.00 kWh";
       
       - lvgl.arc.update:
           id: battery_arc
@@ -123,20 +137,31 @@ interval:
           lv_obj_set_height(id(flow_grid), 4);
           
           // Battery Flow (eckig: vertikal hoch, dann horizontal rechts ins Haus)
-          battery_pos = (battery_pos + 2) % 215;
-          if (battery_pos < 75) {
-            // Vertikal nach oben
-            lv_obj_set_x(id(flow_battery), 258);
-            lv_obj_set_y(id(flow_battery), 350 - battery_pos);
-            lv_obj_set_width(id(flow_battery), 4);
-            lv_obj_set_height(id(flow_battery), 15);
+          // Nur animieren wenn Batterieentladung > 0
+          bool show_battery_discharge = false;
+          if (id(battery_discharge).has_state() && !isnan(id(battery_discharge).state)) {
+            show_battery_discharge = id(battery_discharge).state > 0.0;
+          }
+          
+          if (show_battery_discharge) {
+            lv_obj_clear_flag(id(flow_battery), LV_OBJ_FLAG_HIDDEN);
+            battery_pos = (battery_pos + 2) % 215;
+            if (battery_pos < 75) {
+              // Vertikal nach oben
+              lv_obj_set_x(id(flow_battery), 258);
+              lv_obj_set_y(id(flow_battery), 350 - battery_pos);
+              lv_obj_set_width(id(flow_battery), 4);
+              lv_obj_set_height(id(flow_battery), 15);
+            } else {
+              // Horizontal nach rechts ins Haus
+              int c = battery_pos - 75;
+              lv_obj_set_x(id(flow_battery), 260 + c);
+              lv_obj_set_y(id(flow_battery), 258);
+              lv_obj_set_width(id(flow_battery), 15);
+              lv_obj_set_height(id(flow_battery), 4);
+            }
           } else {
-            // Horizontal nach rechts ins Haus
-            int c = battery_pos - 75;
-            lv_obj_set_x(id(flow_battery), 260 + c);
-            lv_obj_set_y(id(flow_battery), 258);
-            lv_obj_set_width(id(flow_battery), 15);
-            lv_obj_set_height(id(flow_battery), 4);
+            lv_obj_add_flag(id(flow_battery), LV_OBJ_FLAG_HIDDEN);
           }
           
           // Home Flow (horizontal innerhalb Home)
@@ -205,9 +230,20 @@ interval:
           }
           
           // PV -> Battery Flow (vertikal mittig runter)
-          static int pv_battery_pos = 0;
-          pv_battery_pos = (pv_battery_pos + 2) % 270;
-          lv_obj_set_x(id(flow_pv_battery), 238);
-          lv_obj_set_y(id(flow_pv_battery), 130 + pv_battery_pos);
-          lv_obj_set_width(id(flow_pv_battery), 4);
-          lv_obj_set_height(id(flow_pv_battery), 15);
+          // Nur animieren wenn Batterieladung > 0
+          bool show_pv_battery = false;
+          if (id(battery_charge).has_state() && !isnan(id(battery_charge).state)) {
+            show_pv_battery = id(battery_charge).state > 0.0;
+          }
+          
+          if (show_pv_battery) {
+            lv_obj_clear_flag(id(flow_pv_battery), LV_OBJ_FLAG_HIDDEN);
+            static int pv_battery_pos = 0;
+            pv_battery_pos = (pv_battery_pos + 2) % 270;
+            lv_obj_set_x(id(flow_pv_battery), 238);
+            lv_obj_set_y(id(flow_pv_battery), 130 + pv_battery_pos);
+            lv_obj_set_width(id(flow_pv_battery), 4);
+            lv_obj_set_height(id(flow_pv_battery), 15);
+          } else {
+            lv_obj_add_flag(id(flow_pv_battery), LV_OBJ_FLAG_HIDDEN);
+          }

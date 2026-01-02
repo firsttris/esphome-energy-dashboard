@@ -24,3 +24,13 @@ font:
       "\U000F0238",  # flame (Gas)
       "\U000F058C",  # water
     ]
+  
+  - file: "fonts/materialdesignicons-webfont.ttf"
+    id: icons_16
+    size: 16
+    glyphs: [
+      "\U000F0045",  # arrow-down
+      "\U000F005D",  # arrow-up
+      "\U000F0054",  # arrow-right
+      "\U000F004D",  # arrow-left
+    ]

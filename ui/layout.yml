@@ -337,21 +337,43 @@ lvgl:
                   text_font: icons_32
                   text_color: 0x00BBFF
               
+              # Bezug mit Pfeil rechts
               - label:
-                  id: grid_value
                   align: CENTER
-                  y: 10
-                  text: "0.00 / 0.00"
-                  text_font: roboto_14
-                  text_color: 0xFFFFFF
-                  recolor: true
+                  y: 15
+                  x: -28
+                  text: "\U000F0054"
+                  text_font: icons_16
+                  text_color: 0x00BBFF
               
               - label:
+                  id: grid_bezug_label
                   align: CENTER
-                  y: 28
-                  text: "kWh"
+                  y: 15
+                  x: 5
+                  text: "0.00"
                   text_font: roboto_12
-                  text_color: 0x888888
+                  text_color: 0x00BBFF
+                  text_align: RIGHT
+              
+              # Einspeisung mit Pfeil links
+              - label:
+                  align: CENTER
+                  y: 30
+                  x: -28
+                  text: "\U000F004D"
+                  text_font: icons_16
+                  text_color: 0xBB33FF
+              
+              - label:
+                  id: grid_einspeisung_label
+                  align: CENTER
+                  y: 30
+                  x: 5
+                  text: "0.00"
+                  text_font: roboto_12
+                  text_color: 0xBB33FF
+                  text_align: RIGHT
         
         # === HOME (Rechts Mitte) ===
         - obj:
@@ -422,31 +444,58 @@ lvgl:
                     arc_width: 6
                     arc_rounded: true
               
-              # Batterie Icon
+              # Prozent-Label (oben)
+              - label:
+                  id: battery_soc_label
+                  align: CENTER
+                  y: -30
+                  text: "0%"
+                  text_font: roboto_14
+                  text_color: 0xFFFFFF
+              
+              # Batterie Icon (Mitte)
               - label:
                   align: CENTER
-                  y: -10
+                  y: 0
                   text: "\U000F0079"
                   text_font: icons_32
                   text_color: 0xFF3399
               
-              # Power Wert
+              # Ladung mit Pfeil runter
               - label:
-                  id: battery_value
                   align: CENTER
-                  y: 20
-                  text: "0.00"
-                  text_font: roboto_14
-                  text_color: 0xFFFFFF
+                  y: 23
+                  x: -25
+                  text: "\U000F0045"
+                  text_font: icons_16
+                  text_color: 0xFF3399
               
-              # Prozent-Label
               - label:
-                  id: battery_soc_label
+                  id: battery_charge_label
                   align: CENTER
-                  y: 35
-                  text: "0%"
+                  y: 23
+                  x: 8
+                  text: "0.00"
                   text_font: roboto_12
-                  text_color: 0x888888
+                  text_color: 0xFF3399
+              
+              # Entladung mit Pfeil hoch
+              - label:
+                  align: CENTER
+                  y: 38
+                  x: -25
+                  text: "\U000F005D"
+                  text_font: icons_16
+                  text_color: 0x00FF99
+              
+              - label:
+                  id: battery_discharge_label
+                  align: CENTER
+                  y: 38
+                  x: 8
+                  text: "0.00"
+                  text_font: roboto_12
+                  text_color: 0x00FF99
         
         # === GAS (Rechts Oben) ===
         - obj:

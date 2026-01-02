@@ -40,6 +40,16 @@ sensor:
     internal: true
   
   - platform: homeassistant
+    id: battery_charge
+    entity_id: sensor.deye_wechselrichter_deye_tagliche_batterie_ladung
+    internal: true
+  
+  - platform: homeassistant
+    id: battery_discharge
+    entity_id: sensor.deye_wechselrichter_deye_tagliche_batterie_entladung
+    internal: true
+  
+  - platform: homeassistant
     id: gas_power
     entity_id: sensor.gas_tagesverbrauch
     internal: true
