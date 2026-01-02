@@ -7,7 +7,7 @@ interval:
       - lvgl.label.update:
           id: pv_value
           text: !lambda |-
-            if (id(solar_power).has_state()) {
+            if (id(solar_power).has_state() && !isnan(id(solar_power).state)) {
               static char buf[8];
               snprintf(buf, sizeof(buf), "%.2f", id(solar_power).state);
               return buf;
@@ -17,7 +17,7 @@ interval:
       - lvgl.label.update:
           id: grid_value
           text: !lambda |-
-            if (id(grid_power).has_state()) {
+            if (id(grid_power).has_state() && !isnan(id(grid_power).state)) {
               static char buf[8];
               snprintf(buf, sizeof(buf), "%.2f", id(grid_power).state);
               return buf;
@@ -27,7 +27,7 @@ interval:
       - lvgl.label.update:
           id: home_value
           text: !lambda |-
-            if (id(home_power).has_state()) {
+            if (id(home_power).has_state() && !isnan(id(home_power).state)) {
               static char buf[8];
               snprintf(buf, sizeof(buf), "%.2f", id(home_power).state);
               return buf;
@@ -37,17 +37,36 @@ interval:
       - lvgl.label.update:
           id: battery_value
           text: !lambda |-
-            if (id(battery_power).has_state()) {
-              static char buf[8];
-              snprintf(buf, sizeof(buf), "%.2f", id(battery_power).state);
+            if (id(battery_soc).has_state() && !isnan(id(battery_soc).state)) {
+              float available_kwh = id(battery_capacity_kwh) * (id(battery_soc).state / 100.0);
+              static char buf[12];
+              snprintf(buf, sizeof(buf), "%.1f kWh", available_kwh);
               return buf;
             }
-            return "0.00";
+            return "0.0 kWh";
+      
+      - lvgl.arc.update:
+          id: battery_arc
+          value: !lambda |-
+            if (id(battery_soc).has_state() && !isnan(id(battery_soc).state)) {
+              return (int)id(battery_soc).state;
+            }
+            return 0;
+      
+      - lvgl.label.update:
+          id: battery_soc_label
+          text: !lambda |-
+            if (id(battery_soc).has_state() && !isnan(id(battery_soc).state)) {
+              static char buf[8];
+              snprintf(buf, sizeof(buf), "%d%%", (int)id(battery_soc).state);
+              return buf;
+            }
+            return "0%";
       
       - lvgl.label.update:
           id: gas_value
           text: !lambda |-
-            if (id(gas_power).has_state()) {
+            if (id(gas_power).has_state() && !isnan(id(gas_power).state)) {
               static char buf[8];
               snprintf(buf, sizeof(buf), "%.2f", id(gas_power).state);
               return buf;
@@ -57,7 +76,7 @@ interval:
       - lvgl.label.update:
           id: water_value
           text: !lambda |-
-            if (id(water_power).has_state()) {
+            if (id(water_power).has_state() && !isnan(id(water_power).state)) {
               static char buf[8];
               snprintf(buf, sizeof(buf), "%.2f", id(water_power).state);
               return buf;

@@ -1,40 +1,47 @@
 # Home Assistant Sensoren und Zeit
 
+# Globale Variablen
+globals:
+  - id: battery_capacity_kwh
+    type: float
+    restore_value: no
+    initial_value: '13.0'  # Akkukapazität in kWh (anpassbar)
+  
+  - id: ha_connected
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+
 # Home Assistant Sensoren
 sensor:
   - platform: homeassistant
     id: solar_power
-    entity_id: sensor.solar_power
+    entity_id: sensor.deye_wechselrichter_deye_tagliche_produktion
     internal: true
   
   - platform: homeassistant
     id: grid_power
-    entity_id: sensor.grid_power
-    internal: true
-  
-  - platform: homeassistant
-    id: battery_power
-    entity_id: sensor.battery_power
+    entity_id: sensor.deye_wechselrichter_deye_taglich_energie_bezogen
     internal: true
   
   - platform: homeassistant
     id: home_power
-    entity_id: sensor.home_power
+    entity_id: sensor.strom_tagesverbrauch
     internal: true
   
   - platform: homeassistant
     id: battery_soc
-    entity_id: sensor.battery_soc
+    entity_id: sensor.deye_wechselrichter_deye_batterie_soc
     internal: true
   
   - platform: homeassistant
     id: gas_power
-    entity_id: sensor.gaszahler_m3
+    entity_id: sensor.gas_tagesverbrauch
     internal: true
   
   - platform: homeassistant
     id: water_power
-    entity_id: sensor.water_power
+    entity_id: sensor.wasser_tagesverbrauch
     internal: true
 
 # Zeit von Home Assistant

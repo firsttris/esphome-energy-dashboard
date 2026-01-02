@@ -396,31 +396,54 @@ lvgl:
             width: 100
             height: 100
             bg_color: 0x0a0a0a
-            border_color: 0xFF3399
-            border_width: 3
+            border_width: 0
             radius: 50
             scrollbar_mode: "off"
             clickable: false
             widgets:
+              # Fortschrittskreis für Batterie-Ladezustand
+              - arc:
+                  id: battery_arc
+                  align: CENTER
+                  width: 100
+                  height: 100
+                  start_angle: 135
+                  end_angle: 45
+                  rotation: 0
+                  value: 0
+                  min_value: 0
+                  max_value: 100
+                  arc_width: 6
+                  arc_color: 0x1a1a1a
+                  arc_rounded: true
+                  indicator:
+                    arc_color: 0xFF3399
+                    arc_width: 6
+                    arc_rounded: true
+              
+              # Batterie Icon
               - label:
                   align: CENTER
-                  y: -15
+                  y: -10
                   text: "\U000F0079"
                   text_font: icons_32
                   text_color: 0xFF3399
               
+              # Power Wert
               - label:
                   id: battery_value
                   align: CENTER
-                  y: 10
+                  y: 20
                   text: "0.00"
-                  text_font: roboto_16
+                  text_font: roboto_14
                   text_color: 0xFFFFFF
               
+              # Prozent-Label
               - label:
+                  id: battery_soc_label
                   align: CENTER
-                  y: 28
-                  text: "kWh"
+                  y: 35
+                  text: "0%"
                   text_font: roboto_12
                   text_color: 0x888888
         
