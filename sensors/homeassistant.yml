@@ -74,6 +74,11 @@ sensor:
     entity_id: sensor.ac_elwa_2_power_elwa_2
     internal: true
 
+  - platform: homeassistant
+    id: heating_rod_daily_energy
+    entity_id: sensor.ac_elwa_2_energy_consumption_daily
+    internal: true
+
 # Zeit von Home Assistant
 time:
   - platform: homeassistant

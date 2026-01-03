@@ -273,6 +273,15 @@ lvgl:
             line_width: 3
             line_rounded: false
         
+        # Home -> Heizstab (diagonal)
+        - line:
+            points:
+              - 365, 205
+              - 348, 188
+            line_color: 0x552200
+            line_width: 3
+            line_rounded: false
+
         # === Animierte Energiefluss Segmente ===
         - obj:
             id: flow_pv
@@ -364,6 +373,16 @@ lvgl:
             radius: 2
             border_width: 0
         
+        - obj:
+            id: flow_home_heating
+            x: 400
+            y: 190
+            width: 8
+            height: 8
+            bg_color: 0xFF5722
+            radius: 4
+            border_width: 0
+
         # === UHRZEIT & DATUM (Links Oben) ===
         - obj:
             id: datetime_box
@@ -485,6 +504,42 @@ lvgl:
                   text_color: 0xBB33FF
                   text_align: RIGHT
         
+        # === HEIZSTAB (Oben Rechts) ===
+        - obj:
+            id: heating_rod_circle
+            x: 280
+            y: 120
+            width: 80
+            height: 80
+            bg_color: 0x0a0a0a
+            border_color: 0xFF5722
+            border_width: 3
+            radius: 40
+            scrollbar_mode: "off"
+            clickable: false
+            widgets:
+              - label:
+                  align: CENTER
+                  y: -12
+                  text: "\U000F0509"
+                  text_font: icons_32
+                  text_color: 0xFF5722
+              
+              - label:
+                  id: heating_rod_value
+                  align: CENTER
+                  y: 15
+                  text: "0.00"
+                  text_font: roboto_14
+                  text_color: 0xFFFFFF
+              
+              - label:
+                  align: CENTER
+                  y: 30
+                  text: "kWh"
+                  text_font: roboto_12
+                  text_color: 0x888888
+
         # === HOME (Rechts Mitte) ===
         - obj:
             id: home_circle
