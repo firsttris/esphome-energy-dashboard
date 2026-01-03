@@ -88,7 +88,7 @@ lvgl:
             x: 10
             y: 350
             width: 160
-            height: 90
+            height: 100
             bg_color: 0x222222
             radius: 8
             border_width: 1
