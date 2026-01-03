@@ -214,7 +214,7 @@ interval:
           }
 
 
-  - interval: 50ms
+  - interval: 30ms
     then:
       - lambda: |-
           static int pv_pos = 0, grid_pos = 0, battery_pos = 0, gas_pos = 0, water_pos = 0;
