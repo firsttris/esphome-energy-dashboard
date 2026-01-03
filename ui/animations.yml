@@ -71,21 +71,27 @@ interval:
 
       - lambda: |-
           float home = id(home_power).has_state() && !isnan(id(home_power).state) ? id(home_power).state : 0.0;
-          float grid = id(grid_power).has_state() && !isnan(id(grid_power).state) ? id(grid_power).state : 0.0;
           float battery = id(battery_discharge).has_state() && !isnan(id(battery_discharge).state) ? id(battery_discharge).state : 0.0;
+          float solar = id(solar_power).has_state() && !isnan(id(solar_power).state) ? id(solar_power).state : 0.0;
+          float feed_in = id(grid_feed_in).has_state() && !isnan(id(grid_feed_in).state) ? id(grid_feed_in).state : 0.0;
           
           if (home < 0) home = 0;
-          if (grid < 0) grid = 0;
           if (battery < 0) battery = 0;
           
-          float pv = home - grid - battery;
+          // PV Eigenverbrauch direkt aus Solar - Einspeisung berechnen
+          float pv = solar - feed_in;
           if (pv < 0) pv = 0;
+          if (pv > home) pv = home; // Darf nicht größer als Hausverbrauch sein
           
-          float total = grid + pv + battery;
+          float total = home;
           
           if (total > 0.001) {
             int pv_angle = (int)((pv / total) * 360.0);
             int battery_angle = (int)((battery / total) * 360.0);
+            
+            // Ensure minimum visibility for small values
+            if (pv > 0.01 && pv_angle < 10) pv_angle = 10;
+            if (battery > 0.01 && battery_angle < 10) battery_angle = 10;
             
             if (pv_angle > 360) pv_angle = 360;
             if (pv_angle + battery_angle > 360) battery_angle = 360 - pv_angle;
@@ -103,9 +109,18 @@ interval:
             } else {
               lv_obj_add_flag(id(home_arc_battery), LV_OBJ_FLAG_HIDDEN);
             }
+            
+            int grid_start = pv_angle + battery_angle;
+            if (grid_start < 360) {
+              lv_obj_clear_flag(id(home_arc_grid), LV_OBJ_FLAG_HIDDEN);
+              lv_arc_set_angles(id(home_arc_grid), grid_start, 360);
+            } else {
+              lv_obj_add_flag(id(home_arc_grid), LV_OBJ_FLAG_HIDDEN);
+            }
           } else {
             lv_obj_add_flag(id(home_arc_pv), LV_OBJ_FLAG_HIDDEN);
             lv_obj_add_flag(id(home_arc_battery), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(id(home_arc_grid), LV_OBJ_FLAG_HIDDEN);
           }
 
 
