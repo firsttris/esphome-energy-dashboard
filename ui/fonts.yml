@@ -13,6 +13,10 @@ font:
     id: roboto_16
     size: 16
   
+  - file: "gfonts://Roboto"
+    id: roboto_24
+    size: 24
+  
   - file: "fonts/materialdesignicons-webfont.ttf"
     id: icons_32
     size: 32

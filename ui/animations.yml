@@ -1,6 +1,28 @@
 interval:
   - interval: 1s
     then:
+      # Update Time & Date
+      - lvgl.label.update:
+          id: time_label
+          text: !lambda |-
+            static char buf[10];
+            auto time = id(ha_time).now();
+            if (!time.is_valid()) return "00:00";
+            snprintf(buf, sizeof(buf), "%02d:%02d", time.hour, time.minute);
+            return buf;
+
+      - lvgl.label.update:
+          id: date_label
+          text: !lambda |-
+            static char buf[20];
+            auto time = id(ha_time).now();
+            if (!time.is_valid()) return "--.--.";
+            const char* wochentage[] = {"So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"};
+            int dow = time.day_of_week;
+            if (dow < 1 || dow > 7) dow = 1; // Safety
+            snprintf(buf, sizeof(buf), "%s. %02d.%02d.", wochentage[dow - 1], time.day_of_month, time.month);
+            return buf;
+
       # Update Top Left Info Box
       - lvgl.label.update:
           id: lbl_home_consumption

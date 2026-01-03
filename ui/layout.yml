@@ -340,6 +340,32 @@ lvgl:
             radius: 2
             border_width: 0
         
+        # === UHRZEIT & DATUM (Links Oben) ===
+        - obj:
+            id: datetime_box
+            x: 30
+            y: 30
+            width: 120
+            height: 100
+            bg_color: 0x0a0a0a
+            border_width: 0
+            radius: 0
+            widgets:
+              - label:
+                  id: time_label
+                  align: CENTER
+                  y: -10
+                  text: "00:00"
+                  text_font: roboto_24
+                  text_color: 0xFFFFFF
+              - label:
+                  id: date_label
+                  align: CENTER
+                  y: 20
+                  text: "Mo. 01.01."
+                  text_font: roboto_14
+                  text_color: 0x888888
+
         # === PV (Oben Mitte) ===
         - obj:
             id: pv_circle
