@@ -69,6 +69,45 @@ interval:
             snprintf(buf, sizeof(buf), "%.2f", id(water_power).has_state() && !isnan(id(water_power).state) ? id(water_power).state : 0.0);
             return buf;
 
+      - lambda: |-
+          float home = id(home_power).has_state() && !isnan(id(home_power).state) ? id(home_power).state : 0.0;
+          float grid = id(grid_power).has_state() && !isnan(id(grid_power).state) ? id(grid_power).state : 0.0;
+          float battery = id(battery_discharge).has_state() && !isnan(id(battery_discharge).state) ? id(battery_discharge).state : 0.0;
+          
+          if (home < 0) home = 0;
+          if (grid < 0) grid = 0;
+          if (battery < 0) battery = 0;
+          
+          float pv = home - grid - battery;
+          if (pv < 0) pv = 0;
+          
+          float total = grid + pv + battery;
+          
+          if (total > 0.001) {
+            int pv_angle = (int)((pv / total) * 360.0);
+            int battery_angle = (int)((battery / total) * 360.0);
+            
+            if (pv_angle > 360) pv_angle = 360;
+            if (pv_angle + battery_angle > 360) battery_angle = 360 - pv_angle;
+            
+            if (pv_angle > 0) {
+              lv_obj_clear_flag(id(home_arc_pv), LV_OBJ_FLAG_HIDDEN);
+              lv_arc_set_angles(id(home_arc_pv), 0, pv_angle);
+            } else {
+              lv_obj_add_flag(id(home_arc_pv), LV_OBJ_FLAG_HIDDEN);
+            }
+            
+            if (battery_angle > 0) {
+              lv_obj_clear_flag(id(home_arc_battery), LV_OBJ_FLAG_HIDDEN);
+              lv_arc_set_angles(id(home_arc_battery), pv_angle, pv_angle + battery_angle);
+            } else {
+              lv_obj_add_flag(id(home_arc_battery), LV_OBJ_FLAG_HIDDEN);
+            }
+          } else {
+            lv_obj_add_flag(id(home_arc_pv), LV_OBJ_FLAG_HIDDEN);
+            lv_obj_add_flag(id(home_arc_battery), LV_OBJ_FLAG_HIDDEN);
+          }
+
 
   - interval: 30ms
     then:
