@@ -55,6 +55,12 @@ sensor:
     internal: true
 
   - platform: homeassistant
+    id: heating_rod_daily_energy
+    entity_id: sensor.ac_elwa_2_energy_consumption_daily
+    internal: true
+
+  # Aktuelle Leistungswerte (current)
+  - platform: homeassistant
     id: current_home_consumption
     entity_id: sensor.hauverbrauch
     internal: true
@@ -62,6 +68,11 @@ sensor:
   - platform: homeassistant
     id: current_grid_power
     entity_id: sensor.deye_wechselrichter_deye_netz_gesamtleistung
+    internal: true
+    
+  - platform: homeassistant
+    id: current_solar_power
+    entity_id: sensor.deye_wechselrichter_deye_pv_leistung
     internal: true
     
   - platform: homeassistant
@@ -75,8 +86,13 @@ sensor:
     internal: true
 
   - platform: homeassistant
-    id: heating_rod_daily_energy
-    entity_id: sensor.ac_elwa_2_energy_consumption_daily
+    id: current_battery_charge_power
+    entity_id: sensor.deye_wechselrichter_deye_batterie_ladeleistung
+    internal: true
+
+  - platform: homeassistant
+    id: current_battery_discharge_power
+    entity_id: sensor.deye_wechselrichter_deye_batterie_entladeleistung
     internal: true
 
 # Zeit von Home Assistant

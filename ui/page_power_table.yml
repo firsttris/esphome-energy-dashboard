@@ -1,0 +1,213 @@
+# Power Table Page - Aktuelle Leistungswerte
+
+id: page_power_table
+bg_color: 0x1a1a1a
+on_press:
+  - lvgl.page.previous:
+widgets:
+    # === Überschrift ===
+    - label:
+        align: TOP_MID
+        y: 20
+        text: "Aktuelle Leistung"
+        text_font: roboto_24
+        text_color: 0xFFFFFF
+
+    # === Haupttabelle ===
+    - obj:
+        align: CENTER
+        width: 400
+        height: 360
+        bg_color: 0x222222
+        radius: 12
+        border_width: 2
+        border_color: 0x444444
+        scrollbar_mode: "off"
+        pad_all: 20
+        widgets:
+          # === Haus Verbrauch ===
+          - label:
+              x: 0
+              y: 10
+              text: "Hausverbrauch:"
+              text_font: roboto_16
+              text_color: 0x00FF99
+          
+          - label:
+              id: lbl_home_consumption
+              align: TOP_RIGHT
+              x: 0
+              y: 10
+              text: "-- W"
+              text_font: roboto_16
+              text_color: 0x00FF99
+
+          # Trennlinie 1
+          - obj:
+              x: 0
+              y: 45
+              width: 360
+              height: 2
+              bg_color: 0x333333
+              border_width: 0
+              radius: 0
+
+          # === Netzbezug ===
+          - label:
+              x: 0
+              y: 60
+              text: "Netzbezug:"
+              text_font: roboto_16
+              text_color: 0x00BBFF
+          
+          - label:
+              id: lbl_grid_power
+              align: TOP_RIGHT
+              x: 0
+              y: 60
+              text: "-- W"
+              text_font: roboto_16
+              text_color: 0x00BBFF
+
+          # Trennlinie 2
+          - obj:
+              x: 0
+              y: 95
+              width: 360
+              height: 2
+              bg_color: 0x333333
+              border_width: 0
+              radius: 0
+
+          # === PV Erzeugung ===
+          - label:
+              x: 0
+              y: 110
+              text: "PV Erzeugung:"
+              text_font: roboto_16
+              text_color: 0xFFBB33
+          
+          - label:
+              id: lbl_pv_production
+              align: TOP_RIGHT
+              x: 0
+              y: 110
+              text: "-- W"
+              text_font: roboto_16
+              text_color: 0xFFBB33
+
+          # Trennlinie 3
+          - obj:
+              x: 0
+              y: 145
+              width: 360
+              height: 2
+              bg_color: 0x333333
+              border_width: 0
+              radius: 0
+
+          # === PV Überschuss ===
+          - label:
+              x: 0
+              y: 160
+              text: "PV Überschuss:"
+              text_font: roboto_16
+              text_color: 0xBB33FF
+          
+          - label:
+              id: lbl_pv_surplus
+              align: TOP_RIGHT
+              x: 0
+              y: 160
+              text: "-- W"
+              text_font: roboto_16
+              text_color: 0xBB33FF
+
+          # Trennlinie 4
+          - obj:
+              x: 0
+              y: 195
+              width: 360
+              height: 2
+              bg_color: 0x333333
+              border_width: 0
+              radius: 0
+
+          # === Heizstab ===
+          - label:
+              x: 0
+              y: 210
+              text: "Heizstab:"
+              text_font: roboto_16
+              text_color: 0xFF5722
+          
+          - label:
+              id: lbl_heating_rod
+              align: TOP_RIGHT
+              x: 0
+              y: 210
+              text: "-- W"
+              text_font: roboto_16
+              text_color: 0xFF5722
+
+          # Trennlinie 5
+          - obj:
+              x: 0
+              y: 245
+              width: 360
+              height: 2
+              bg_color: 0x333333
+              border_width: 0
+              radius: 0
+
+          # === Batterie Ladung ===
+          - label:
+              x: 0
+              y: 260
+              text: "Batterie Ladung:"
+              text_font: roboto_16
+              text_color: 0xFF3399
+          
+          - label:
+              id: lbl_battery_charge
+              align: TOP_RIGHT
+              x: 0
+              y: 260
+              text: "-- W"
+              text_font: roboto_16
+              text_color: 0xFF3399
+
+          # Trennlinie 6
+          - obj:
+              x: 0
+              y: 295
+              width: 360
+              height: 2
+              bg_color: 0x333333
+              border_width: 0
+              radius: 0
+
+          # === Batterie Entladung ===
+          - label:
+              x: 0
+              y: 310
+              text: "Batterie Entladung:"
+              text_font: roboto_16
+              text_color: 0x00FF99
+          
+          - label:
+              id: lbl_battery_discharge
+              align: TOP_RIGHT
+              x: 0
+              y: 310
+              text: "-- W"
+              text_font: roboto_16
+              text_color: 0x00FF99
+
+    # === Hinweis für Swipe ===
+    - label:
+        align: BOTTOM_MID
+        y: -20
+        text: "← Tippen zum Zurückkehren →"
+        text_font: roboto_12
+        text_color: 0x666666

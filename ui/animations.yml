@@ -1,356 +1,333 @@
 interval:
   - interval: 1s
     then:
-      # Update Time & Date
-      - lvgl.label.update:
-          id: time_label
-          text: !lambda |-
-            static char buf[10];
-            auto time = id(ha_time).now();
-            if (!time.is_valid()) return "00:00";
-            snprintf(buf, sizeof(buf), "%02d:%02d", time.hour, time.minute);
-            return buf;
+      # Prüfen ob Dashboard aktiv ist
+      - if:
+          condition:
+            lambda: 'return lv_scr_act() == id(page_dashboard).obj;'
+          then:
+            # Update Time & Date
+            - lvgl.label.update:
+                id: time_label
+                text: !lambda |-
+                  static char buf[10];
+                  auto time = id(ha_time).now();
+                  if (!time.is_valid()) return "00:00";
+                  snprintf(buf, sizeof(buf), "%02d:%02d", time.hour, time.minute);
+                  return buf;
 
-      - lvgl.label.update:
-          id: date_label
-          text: !lambda |-
-            static char buf[20];
-            auto time = id(ha_time).now();
-            if (!time.is_valid()) return "--.--.";
-            const char* wochentage[] = {"So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"};
-            int dow = time.day_of_week;
-            if (dow < 1 || dow > 7) dow = 1; // Safety
-            snprintf(buf, sizeof(buf), "%s. %02d.%02d.", wochentage[dow - 1], time.day_of_month, time.month);
-            return buf;
+            - lvgl.label.update:
+                id: date_label
+                text: !lambda |-
+                  static char buf[20];
+                  auto time = id(ha_time).now();
+                  if (!time.is_valid()) return "--.--.";
+                  const char* wochentage[] = {"So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"};
+                  int dow = time.day_of_week;
+                  if (dow < 1 || dow > 7) dow = 1; // Safety
+                  snprintf(buf, sizeof(buf), "%s. %02d.%02d.", wochentage[dow - 1], time.day_of_month, time.month);
+                  return buf;
 
-      - delay: 0.2s
+            - delay: 0.2s
 
-      # Update Top Left Info Box
-      - lvgl.label.update:
-          id: lbl_home_consumption
-          text: !lambda |-
-            static char buf[16];
-            snprintf(buf, sizeof(buf), "%.0f W", id(current_home_consumption).has_state() && !isnan(id(current_home_consumption).state) ? id(current_home_consumption).state : 0.0);
-            return buf;
-      
-      - lvgl.label.update:
-          id: lbl_grid_power
-          text: !lambda |-
-            static char buf[16];
-            snprintf(buf, sizeof(buf), "%.0f W", id(current_grid_power).has_state() && !isnan(id(current_grid_power).state) ? id(current_grid_power).state : 0.0);
-            return buf;
-      
-      - lvgl.label.update:
-          id: lbl_pv_surplus
-          text: !lambda |-
-            static char buf[16];
-            snprintf(buf, sizeof(buf), "%.0f W", id(current_pv_surplus).has_state() && !isnan(id(current_pv_surplus).state) ? id(current_pv_surplus).state : 0.0);
-            return buf;
-
-      - lvgl.label.update:
-          id: lbl_heating_rod
-          text: !lambda |-
-            static char buf[16];
-            snprintf(buf, sizeof(buf), "%.0f W", id(current_heating_rod_power).has_state() && !isnan(id(current_heating_rod_power).state) ? id(current_heating_rod_power).state : 0.0);
-            return buf;
-
-      - delay: 0.2s
-
-      - lvgl.label.update:
-          id: pv_value
-          text: !lambda |-
-            static char buf[8];
-            snprintf(buf, sizeof(buf), "%.2f", id(solar_power).has_state() && !isnan(id(solar_power).state) ? id(solar_power).state : 0.0);
-            return buf;
-      
-      - lvgl.label.update:
-          id: grid_bezug_label
-          text: !lambda |-
-            static char buf[20];
-            snprintf(buf, sizeof(buf), "%6.2f kWh", id(grid_power).has_state() && !isnan(id(grid_power).state) ? id(grid_power).state : 0.0);
-            return buf;
-      
-      - lvgl.label.update:
-          id: grid_einspeisung_label
-          text: !lambda |-
-            static char buf[20];
-            snprintf(buf, sizeof(buf), "%6.2f kWh", id(grid_feed_in).has_state() && !isnan(id(grid_feed_in).state) ? id(grid_feed_in).state : 0.0);
-            return buf;
-
-      - delay: 0.2s
-
-      - lvgl.label.update:
-          id: home_value
-          text: !lambda |-
-            static char buf[8];
-            snprintf(buf, sizeof(buf), "%.2f", id(home_power).has_state() && !isnan(id(home_power).state) ? id(home_power).state : 0.0);
-            return buf;
-      
-      - lvgl.label.update:
-          id: battery_charge_label
-          text: !lambda |-
-            static char buf[20];
-            snprintf(buf, sizeof(buf), "%.2f kWh", id(battery_charge).has_state() && !isnan(id(battery_charge).state) ? id(battery_charge).state : 0.0);
-            return buf;
-      
-      - lvgl.label.update:
-          id: battery_discharge_label
-          text: !lambda |-
-            static char buf[20];
-            snprintf(buf, sizeof(buf), "%.2f kWh", id(battery_discharge).has_state() && !isnan(id(battery_discharge).state) ? id(battery_discharge).state : 0.0);
-            return buf;
-
-      - delay: 0.2s
-
-      - lvgl.label.update:
-          id: heating_rod_value
-          text: !lambda |-
-            static char buf[8];
-            snprintf(buf, sizeof(buf), "%.2f", id(heating_rod_daily_energy).has_state() && !isnan(id(heating_rod_daily_energy).state) ? id(heating_rod_daily_energy).state : 0.0);
-            return buf;
-
-      - lvgl.arc.update:
-          id: battery_arc
-          value: !lambda |-
-            return id(battery_soc).has_state() && !isnan(id(battery_soc).state) ? (int)id(battery_soc).state : 0;
-      
-      - lvgl.label.update:
-          id: battery_soc_label
-          text: !lambda |-
-            static char buf[8];
-            snprintf(buf, sizeof(buf), "%d%%", id(battery_soc).has_state() && !isnan(id(battery_soc).state) ? (int)id(battery_soc).state : 0);
-            return buf;
-      
-      - lvgl.label.update:
-          id: gas_value
-          text: !lambda |-
-            static char buf[8];
-            snprintf(buf, sizeof(buf), "%.2f", id(gas_power).has_state() && !isnan(id(gas_power).state) ? id(gas_power).state : 0.0);
-            return buf;
-      
-      - lvgl.label.update:
-          id: water_value
-          text: !lambda |-
-            static char buf[8];
-            snprintf(buf, sizeof(buf), "%.2f", id(water_power).has_state() && !isnan(id(water_power).state) ? id(water_power).state : 0.0);
-            return buf;
-
-      - delay: 0.2s
-
-      - lambda: |-
-          static int last_pv_angle = -1;
-          static int last_battery_angle = -1;
-          static int last_grid_start = -1;
-          static bool last_was_hidden = false;
-
-          float home = id(home_power).has_state() && !isnan(id(home_power).state) ? id(home_power).state : 0.0;
-          float battery = id(battery_discharge).has_state() && !isnan(id(battery_discharge).state) ? id(battery_discharge).state : 0.0;
-          float solar = id(solar_power).has_state() && !isnan(id(solar_power).state) ? id(solar_power).state : 0.0;
-          float feed_in = id(grid_feed_in).has_state() && !isnan(id(grid_feed_in).state) ? id(grid_feed_in).state : 0.0;
-          float battery_charge_val = id(battery_charge).has_state() && !isnan(id(battery_charge).state) ? id(battery_charge).state : 0.0;
-          
-          if (home < 0) home = 0;
-          if (battery < 0) battery = 0;
-          
-          // PV Eigenverbrauch direkt aus Solar - Einspeisung - Batterieladung berechnen
-          float pv = solar - feed_in - battery_charge_val;
-          if (pv < 0) pv = 0;
-          if (pv > home) pv = home; // Darf nicht größer als Hausverbrauch sein
-          
-          float total = home;
-          
-          if (total > 0.001) {
-            last_was_hidden = false;
-            int pv_angle = (int)((pv / total) * 360.0);
-            int battery_angle = (int)((battery / total) * 360.0);
+            - lvgl.label.update:
+                id: pv_value
+                text: !lambda |-
+                  static char buf[8];
+                  snprintf(buf, sizeof(buf), "%.2f", id(solar_power).has_state() && !isnan(id(solar_power).state) ? id(solar_power).state : 0.0);
+                  return buf;
             
-            // Ensure minimum visibility for small values
-            if (pv > 0.01 && pv_angle < 10) pv_angle = 10;
-            if (battery > 0.01 && battery_angle < 10) battery_angle = 10;
+            - lvgl.label.update:
+                id: grid_bezug_label
+                text: !lambda |-
+                  static char buf[20];
+                  snprintf(buf, sizeof(buf), "%6.2f kWh", id(grid_power).has_state() && !isnan(id(grid_power).state) ? id(grid_power).state : 0.0);
+                  return buf;
             
-            if (pv_angle > 360) pv_angle = 360;
-            if (pv_angle + battery_angle > 360) battery_angle = 360 - pv_angle;
+            - lvgl.label.update:
+                id: grid_einspeisung_label
+                text: !lambda |-
+                  static char buf[20];
+                  snprintf(buf, sizeof(buf), "%6.2f kWh", id(grid_feed_in).has_state() && !isnan(id(grid_feed_in).state) ? id(grid_feed_in).state : 0.0);
+                  return buf;
+
+            - delay: 0.2s
+
+            - lvgl.label.update:
+                id: home_value
+                text: !lambda |-
+                  static char buf[8];
+                  snprintf(buf, sizeof(buf), "%.2f", id(home_power).has_state() && !isnan(id(home_power).state) ? id(home_power).state : 0.0);
+                  return buf;
             
-            if (pv_angle != last_pv_angle) {
-                if (pv_angle > 0) {
-                  lv_obj_clear_flag(id(home_arc_pv), LV_OBJ_FLAG_HIDDEN);
-                  lv_arc_set_angles(id(home_arc_pv), 0, pv_angle);
+            - lvgl.label.update:
+                id: battery_charge_label
+                text: !lambda |-
+                  static char buf[20];
+                  snprintf(buf, sizeof(buf), "%.2f kWh", id(battery_charge).has_state() && !isnan(id(battery_charge).state) ? id(battery_charge).state : 0.0);
+                  return buf;
+            
+            - lvgl.label.update:
+                id: battery_discharge_label
+                text: !lambda |-
+                  static char buf[20];
+                  snprintf(buf, sizeof(buf), "%.2f kWh", id(battery_discharge).has_state() && !isnan(id(battery_discharge).state) ? id(battery_discharge).state : 0.0);
+                  return buf;
+
+            - delay: 0.2s
+
+            - lvgl.label.update:
+                id: heating_rod_value
+                text: !lambda |-
+                  static char buf[8];
+                  snprintf(buf, sizeof(buf), "%.2f", id(heating_rod_daily_energy).has_state() && !isnan(id(heating_rod_daily_energy).state) ? id(heating_rod_daily_energy).state : 0.0);
+                  return buf;
+
+            - lvgl.arc.update:
+                id: battery_arc
+                value: !lambda |-
+                  return id(battery_soc).has_state() && !isnan(id(battery_soc).state) ? (int)id(battery_soc).state : 0;
+            
+            - lvgl.label.update:
+                id: battery_soc_label
+                text: !lambda |-
+                  static char buf[8];
+                  snprintf(buf, sizeof(buf), "%d%%", id(battery_soc).has_state() && !isnan(id(battery_soc).state) ? (int)id(battery_soc).state : 0);
+                  return buf;
+            
+            - lvgl.label.update:
+                id: gas_value
+                text: !lambda |-
+                  static char buf[8];
+                  snprintf(buf, sizeof(buf), "%.2f", id(gas_power).has_state() && !isnan(id(gas_power).state) ? id(gas_power).state : 0.0);
+                  return buf;
+            
+            - lvgl.label.update:
+                id: water_value
+                text: !lambda |-
+                  static char buf[8];
+                  snprintf(buf, sizeof(buf), "%.2f", id(water_power).has_state() && !isnan(id(water_power).state) ? id(water_power).state : 0.0);
+                  return buf;
+
+            - delay: 0.2s
+
+            - lambda: |-
+                static int last_pv_angle = -1;
+                static int last_battery_angle = -1;
+                static int last_grid_start = -1;
+                static bool last_was_hidden = false;
+
+                float home = id(home_power).has_state() && !isnan(id(home_power).state) ? id(home_power).state : 0.0;
+                float battery = id(battery_discharge).has_state() && !isnan(id(battery_discharge).state) ? id(battery_discharge).state : 0.0;
+                float solar = id(solar_power).has_state() && !isnan(id(solar_power).state) ? id(solar_power).state : 0.0;
+                float feed_in = id(grid_feed_in).has_state() && !isnan(id(grid_feed_in).state) ? id(grid_feed_in).state : 0.0;
+                float battery_charge_val = id(battery_charge).has_state() && !isnan(id(battery_charge).state) ? id(battery_charge).state : 0.0;
+                
+                if (home < 0) home = 0;
+                if (battery < 0) battery = 0;
+                
+                // PV Eigenverbrauch direkt aus Solar - Einspeisung - Batterieladung berechnen
+                float pv = solar - feed_in - battery_charge_val;
+                if (pv < 0) pv = 0;
+                if (pv > home) pv = home; // Darf nicht größer als Hausverbrauch sein
+                
+                float total = home;
+                
+                if (total > 0.001) {
+                  last_was_hidden = false;
+                  int pv_angle = (int)((pv / total) * 360.0);
+                  int battery_angle = (int)((battery / total) * 360.0);
+                  
+                  // Ensure minimum visibility for small values
+                  if (pv > 0.01 && pv_angle < 10) pv_angle = 10;
+                  if (battery > 0.01 && battery_angle < 10) battery_angle = 10;
+                  
+                  if (pv_angle > 360) pv_angle = 360;
+                  if (pv_angle + battery_angle > 360) battery_angle = 360 - pv_angle;
+                  
+                  if (pv_angle != last_pv_angle) {
+                      if (pv_angle > 0) {
+                        lv_obj_clear_flag(id(home_arc_pv), LV_OBJ_FLAG_HIDDEN);
+                        lv_arc_set_angles(id(home_arc_pv), 0, pv_angle);
+                      } else {
+                        lv_obj_add_flag(id(home_arc_pv), LV_OBJ_FLAG_HIDDEN);
+                      }
+                      last_pv_angle = pv_angle;
+                  }
+                  
+                  if (battery_angle != last_battery_angle || pv_angle != last_pv_angle) {
+                      if (battery_angle > 0) {
+                        lv_obj_clear_flag(id(home_arc_battery), LV_OBJ_FLAG_HIDDEN);
+                        lv_arc_set_angles(id(home_arc_battery), pv_angle, pv_angle + battery_angle);
+                      } else {
+                        lv_obj_add_flag(id(home_arc_battery), LV_OBJ_FLAG_HIDDEN);
+                      }
+                      last_battery_angle = battery_angle;
+                  }
+                  
+                  int grid_start = pv_angle + battery_angle;
+                  if (grid_start != last_grid_start) {
+                      if (grid_start < 360) {
+                        lv_obj_clear_flag(id(home_arc_grid), LV_OBJ_FLAG_HIDDEN);
+                        lv_arc_set_angles(id(home_arc_grid), grid_start, 360);
+                      } else {
+                        lv_obj_add_flag(id(home_arc_grid), LV_OBJ_FLAG_HIDDEN);
+                      }
+                      last_grid_start = grid_start;
+                  }
                 } else {
-                  lv_obj_add_flag(id(home_arc_pv), LV_OBJ_FLAG_HIDDEN);
+                  if (!last_was_hidden) {
+                      lv_obj_add_flag(id(home_arc_pv), LV_OBJ_FLAG_HIDDEN);
+                      lv_obj_add_flag(id(home_arc_battery), LV_OBJ_FLAG_HIDDEN);
+                      lv_obj_add_flag(id(home_arc_grid), LV_OBJ_FLAG_HIDDEN);
+                      last_was_hidden = true;
+                      last_pv_angle = -1;
+                      last_battery_angle = -1;
+                      last_grid_start = -1;
+                  }
                 }
-                last_pv_angle = pv_angle;
-            }
-            
-            if (battery_angle != last_battery_angle || pv_angle != last_pv_angle) {
-                if (battery_angle > 0) {
-                  lv_obj_clear_flag(id(home_arc_battery), LV_OBJ_FLAG_HIDDEN);
-                  lv_arc_set_angles(id(home_arc_battery), pv_angle, pv_angle + battery_angle);
-                } else {
-                  lv_obj_add_flag(id(home_arc_battery), LV_OBJ_FLAG_HIDDEN);
-                }
-                last_battery_angle = battery_angle;
-            }
-            
-            int grid_start = pv_angle + battery_angle;
-            if (grid_start != last_grid_start) {
-                if (grid_start < 360) {
-                  lv_obj_clear_flag(id(home_arc_grid), LV_OBJ_FLAG_HIDDEN);
-                  lv_arc_set_angles(id(home_arc_grid), grid_start, 360);
-                } else {
-                  lv_obj_add_flag(id(home_arc_grid), LV_OBJ_FLAG_HIDDEN);
-                }
-                last_grid_start = grid_start;
-            }
-          } else {
-            if (!last_was_hidden) {
-                lv_obj_add_flag(id(home_arc_pv), LV_OBJ_FLAG_HIDDEN);
-                lv_obj_add_flag(id(home_arc_battery), LV_OBJ_FLAG_HIDDEN);
-                lv_obj_add_flag(id(home_arc_grid), LV_OBJ_FLAG_HIDDEN);
-                last_was_hidden = true;
-                last_pv_angle = -1;
-                last_battery_angle = -1;
-                last_grid_start = -1;
-            }
-          }
 
 
   - interval: 30ms
     then:
-      - lambda: |-
-          static int pv_pos = 0, grid_pos = 0, battery_pos = 0, gas_pos = 0, water_pos = 0;
-          static int grid_battery_pos = 0, pv_grid_pos = 0, pv_battery_pos = 0, home_heating_pos = 0;
-          
-          bool show_pv_home = id(solar_power).has_state() && !isnan(id(solar_power).state) && id(solar_power).state > 0.0;
-          if (show_pv_home) {
-            lv_obj_clear_flag(id(flow_pv), LV_OBJ_FLAG_HIDDEN);
-            pv_pos = (pv_pos + 2) % 215;
-            if (pv_pos < 75) {
-              lv_obj_set_x(id(flow_pv), 258);
-              lv_obj_set_y(id(flow_pv), 130 + pv_pos);
-              lv_obj_set_width(id(flow_pv), 4);
-              lv_obj_set_height(id(flow_pv), 15);
-            } else {
-              lv_obj_set_x(id(flow_pv), 260 + pv_pos - 75);
-              lv_obj_set_y(id(flow_pv), 218);
-              lv_obj_set_width(id(flow_pv), 15);
-              lv_obj_set_height(id(flow_pv), 4);
-            }
-          } else {
-            lv_obj_add_flag(id(flow_pv), LV_OBJ_FLAG_HIDDEN);
-          }
-          
-          bool show_grid_home = id(grid_power).has_state() && !isnan(id(grid_power).state) && id(grid_power).state > 0.0;
-          if (show_grid_home) {
-            lv_obj_clear_flag(id(flow_grid), LV_OBJ_FLAG_HIDDEN);
-            grid_pos = (grid_pos + 3) % 270;
-            lv_obj_set_x(id(flow_grid), 130 + grid_pos);
-            lv_obj_set_y(id(flow_grid), 238);
-            lv_obj_set_width(id(flow_grid), 15);
-            lv_obj_set_height(id(flow_grid), 4);
-          } else {
-            lv_obj_add_flag(id(flow_grid), LV_OBJ_FLAG_HIDDEN);
-          }
-          
-          bool show_battery_discharge = id(battery_discharge).has_state() && !isnan(id(battery_discharge).state) && id(battery_discharge).state > 0.0;
-          if (show_battery_discharge) {
-            lv_obj_clear_flag(id(flow_battery), LV_OBJ_FLAG_HIDDEN);
-            battery_pos = (battery_pos + 2) % 215;
-            if (battery_pos < 90) {
-              lv_obj_set_x(id(flow_battery), 258);
-              lv_obj_set_y(id(flow_battery), 350 - battery_pos);
-              lv_obj_set_width(id(flow_battery), 4);
-              lv_obj_set_height(id(flow_battery), 15);
-            } else {
-              lv_obj_set_x(id(flow_battery), 260 + battery_pos - 90);
-              lv_obj_set_y(id(flow_battery), 258);
-              lv_obj_set_width(id(flow_battery), 15);
-              lv_obj_set_height(id(flow_battery), 4);
-            }
-          } else {
-            lv_obj_add_flag(id(flow_battery), LV_OBJ_FLAG_HIDDEN);
-          }
-          
-          lv_obj_set_x(id(flow_home), 360);
-          lv_obj_set_y(id(flow_home), 238);
-          
-          gas_pos = (gas_pos + 1) % 110;
-          lv_obj_set_x(id(flow_gas), 398);
-          lv_obj_set_y(id(flow_gas), 130 + gas_pos);
-          lv_obj_set_width(id(flow_gas), 4);
-          lv_obj_set_height(id(flow_gas), 15);
-          
-          water_pos = (water_pos + 1) % 110;
-          lv_obj_set_x(id(flow_water), 398);
-          lv_obj_set_y(id(flow_water), 350 - water_pos);
-          lv_obj_set_width(id(flow_water), 4);
-          lv_obj_set_height(id(flow_water), 15);
-          
-          bool show_grid_battery = !show_pv_home && (id(battery_charge).has_state() && !isnan(id(battery_charge).state) && id(battery_charge).state > 0.0);
-          if (show_grid_battery) {
-            lv_obj_clear_flag(id(flow_grid_battery), LV_OBJ_FLAG_HIDDEN);
-            grid_battery_pos = (grid_battery_pos + 2) % 215;
-            if (grid_battery_pos < 75) {
-              lv_obj_set_x(id(flow_grid_battery), 130 + grid_battery_pos);
-              lv_obj_set_y(id(flow_grid_battery), 258);
-              lv_obj_set_width(id(flow_grid_battery), 15);
-              lv_obj_set_height(id(flow_grid_battery), 4);
-            } else {
-              lv_obj_set_x(id(flow_grid_battery), 218);
-              lv_obj_set_y(id(flow_grid_battery), 260 + grid_battery_pos - 75);
-              lv_obj_set_width(id(flow_grid_battery), 4);
-              lv_obj_set_height(id(flow_grid_battery), 15);
-            }
-          } else {
-            lv_obj_add_flag(id(flow_grid_battery), LV_OBJ_FLAG_HIDDEN);
-          }
-          
-          bool show_pv_grid = id(grid_feed_in).has_state() && !isnan(id(grid_feed_in).state) && id(grid_feed_in).state > 0.0;
-          if (show_pv_grid) {
-            lv_obj_clear_flag(id(flow_pv_grid), LV_OBJ_FLAG_HIDDEN);
-            pv_grid_pos = (pv_grid_pos + 2) % 215;
-            if (pv_grid_pos < 75) {
-              lv_obj_set_x(id(flow_pv_grid), 218);
-              lv_obj_set_y(id(flow_pv_grid), 130 + pv_grid_pos);
-              lv_obj_set_width(id(flow_pv_grid), 4);
-              lv_obj_set_height(id(flow_pv_grid), 15);
-            } else {
-              lv_obj_set_x(id(flow_pv_grid), 203 - (pv_grid_pos - 75));
-              lv_obj_set_y(id(flow_pv_grid), 218);
-              lv_obj_set_width(id(flow_pv_grid), 15);
-              lv_obj_set_height(id(flow_pv_grid), 4);
-            }
-          } else {
-            lv_obj_add_flag(id(flow_pv_grid), LV_OBJ_FLAG_HIDDEN);
-          }
-          
-          bool show_pv_battery = id(battery_charge).has_state() && !isnan(id(battery_charge).state) && id(battery_charge).state > 0.0;
-          if (show_pv_battery) {
-            lv_obj_clear_flag(id(flow_pv_battery), LV_OBJ_FLAG_HIDDEN);
-            pv_battery_pos = (pv_battery_pos + 2) % 270;
-            lv_obj_set_x(id(flow_pv_battery), 238);
-            lv_obj_set_y(id(flow_pv_battery), 130 + pv_battery_pos);
-            lv_obj_set_width(id(flow_pv_battery), 4);
-            lv_obj_set_height(id(flow_pv_battery), 15);
-          } else {
-            lv_obj_add_flag(id(flow_pv_battery), LV_OBJ_FLAG_HIDDEN);
-          }
-          
-          bool show_home_heating = id(heating_rod_daily_energy).has_state() && !isnan(id(heating_rod_daily_energy).state) && id(heating_rod_daily_energy).state > 0.0;
-          if (show_home_heating) {
-            lv_obj_clear_flag(id(flow_home_heating), LV_OBJ_FLAG_HIDDEN);
-            
-            home_heating_pos = (home_heating_pos + 1) % 45;
-            
-            // Diagonal movement from 365,205 to 320,160 (center of heating rod circle)
-            // Delta x = -45, Delta y = -45
-            
-            lv_obj_set_x(id(flow_home_heating), 365 - home_heating_pos);
-            lv_obj_set_y(id(flow_home_heating), 205 - home_heating_pos);
-            lv_obj_set_width(id(flow_home_heating), 8);
-            lv_obj_set_height(id(flow_home_heating), 8);
-            
-          } else {
-            lv_obj_add_flag(id(flow_home_heating), LV_OBJ_FLAG_HIDDEN);
-          }
-
+      - if:
+          condition:
+            lambda: 'return lv_scr_act() == id(page_dashboard).obj;'
+          then:
+            - lambda: |-
+                static int pv_pos = 0, grid_pos = 0, battery_pos = 0, gas_pos = 0, water_pos = 0;
+                static int grid_battery_pos = 0, pv_grid_pos = 0, pv_battery_pos = 0, home_heating_pos = 0;
+                
+                bool show_pv_home = id(solar_power).has_state() && !isnan(id(solar_power).state) && id(solar_power).state > 0.0;
+                if (show_pv_home) {
+                  lv_obj_clear_flag(id(flow_pv), LV_OBJ_FLAG_HIDDEN);
+                  pv_pos = (pv_pos + 2) % 215;
+                  if (pv_pos < 75) {
+                    lv_obj_set_x(id(flow_pv), 258);
+                    lv_obj_set_y(id(flow_pv), 130 + pv_pos);
+                    lv_obj_set_width(id(flow_pv), 4);
+                    lv_obj_set_height(id(flow_pv), 15);
+                  } else {
+                    lv_obj_set_x(id(flow_pv), 260 + pv_pos - 75);
+                    lv_obj_set_y(id(flow_pv), 218);
+                    lv_obj_set_width(id(flow_pv), 15);
+                    lv_obj_set_height(id(flow_pv), 4);
+                  }
+                } else {
+                  lv_obj_add_flag(id(flow_pv), LV_OBJ_FLAG_HIDDEN);
+                }
+                
+                bool show_grid_home = id(grid_power).has_state() && !isnan(id(grid_power).state) && id(grid_power).state > 0.0;
+                if (show_grid_home) {
+                  lv_obj_clear_flag(id(flow_grid), LV_OBJ_FLAG_HIDDEN);
+                  grid_pos = (grid_pos + 3) % 270;
+                  lv_obj_set_x(id(flow_grid), 130 + grid_pos);
+                  lv_obj_set_y(id(flow_grid), 238);
+                  lv_obj_set_width(id(flow_grid), 15);
+                  lv_obj_set_height(id(flow_grid), 4);
+                } else {
+                  lv_obj_add_flag(id(flow_grid), LV_OBJ_FLAG_HIDDEN);
+                }
+                
+                bool show_battery_discharge = id(battery_discharge).has_state() && !isnan(id(battery_discharge).state) && id(battery_discharge).state > 0.0;
+                if (show_battery_discharge) {
+                  lv_obj_clear_flag(id(flow_battery), LV_OBJ_FLAG_HIDDEN);
+                  battery_pos = (battery_pos + 2) % 215;
+                  if (battery_pos < 90) {
+                    lv_obj_set_x(id(flow_battery), 258);
+                    lv_obj_set_y(id(flow_battery), 350 - battery_pos);
+                    lv_obj_set_width(id(flow_battery), 4);
+                    lv_obj_set_height(id(flow_battery), 15);
+                  } else {
+                    lv_obj_set_x(id(flow_battery), 260 + battery_pos - 90);
+                    lv_obj_set_y(id(flow_battery), 258);
+                    lv_obj_set_width(id(flow_battery), 15);
+                    lv_obj_set_height(id(flow_battery), 4);
+                  }
+                } else {
+                  lv_obj_add_flag(id(flow_battery), LV_OBJ_FLAG_HIDDEN);
+                }
+                
+                lv_obj_set_x(id(flow_home), 360);
+                lv_obj_set_y(id(flow_home), 238);
+                
+                gas_pos = (gas_pos + 1) % 110;
+                lv_obj_set_x(id(flow_gas), 398);
+                lv_obj_set_y(id(flow_gas), 130 + gas_pos);
+                lv_obj_set_width(id(flow_gas), 4);
+                lv_obj_set_height(id(flow_gas), 15);
+                
+                water_pos = (water_pos + 1) % 110;
+                lv_obj_set_x(id(flow_water), 398);
+                lv_obj_set_y(id(flow_water), 350 - water_pos);
+                lv_obj_set_width(id(flow_water), 4);
+                lv_obj_set_height(id(flow_water), 15);
+                
+                bool show_grid_battery = !show_pv_home && (id(battery_charge).has_state() && !isnan(id(battery_charge).state) && id(battery_charge).state > 0.0);
+                if (show_grid_battery) {
+                  lv_obj_clear_flag(id(flow_grid_battery), LV_OBJ_FLAG_HIDDEN);
+                  grid_battery_pos = (grid_battery_pos + 2) % 215;
+                  if (grid_battery_pos < 75) {
+                    lv_obj_set_x(id(flow_grid_battery), 130 + grid_battery_pos);
+                    lv_obj_set_y(id(flow_grid_battery), 258);
+                    lv_obj_set_width(id(flow_grid_battery), 15);
+                    lv_obj_set_height(id(flow_grid_battery), 4);
+                  } else {
+                    lv_obj_set_x(id(flow_grid_battery), 218);
+                    lv_obj_set_y(id(flow_grid_battery), 260 + grid_battery_pos - 75);
+                    lv_obj_set_width(id(flow_grid_battery), 4);
+                    lv_obj_set_height(id(flow_grid_battery), 15);
+                  }
+                } else {
+                  lv_obj_add_flag(id(flow_grid_battery), LV_OBJ_FLAG_HIDDEN);
+                }
+                
+                bool show_pv_grid = id(grid_feed_in).has_state() && !isnan(id(grid_feed_in).state) && id(grid_feed_in).state > 0.0;
+                if (show_pv_grid) {
+                  lv_obj_clear_flag(id(flow_pv_grid), LV_OBJ_FLAG_HIDDEN);
+                  pv_grid_pos = (pv_grid_pos + 2) % 215;
+                  if (pv_grid_pos < 75) {
+                    lv_obj_set_x(id(flow_pv_grid), 218);
+                    lv_obj_set_y(id(flow_pv_grid), 130 + pv_grid_pos);
+                    lv_obj_set_width(id(flow_pv_grid), 4);
+                    lv_obj_set_height(id(flow_pv_grid), 15);
+                  } else {
+                    lv_obj_set_x(id(flow_pv_grid), 203 - (pv_grid_pos - 75));
+                    lv_obj_set_y(id(flow_pv_grid), 218);
+                    lv_obj_set_width(id(flow_pv_grid), 15);
+                    lv_obj_set_height(id(flow_pv_grid), 4);
+                  }
+                } else {
+                  lv_obj_add_flag(id(flow_pv_grid), LV_OBJ_FLAG_HIDDEN);
+                }
+                
+                bool show_pv_battery = id(battery_charge).has_state() && !isnan(id(battery_charge).state) && id(battery_charge).state > 0.0;
+                if (show_pv_battery) {
+                  lv_obj_clear_flag(id(flow_pv_battery), LV_OBJ_FLAG_HIDDEN);
+                  pv_battery_pos = (pv_battery_pos + 2) % 270;
+                  lv_obj_set_x(id(flow_pv_battery), 238);
+                  lv_obj_set_y(id(flow_pv_battery), 130 + pv_battery_pos);
+                  lv_obj_set_width(id(flow_pv_battery), 4);
+                  lv_obj_set_height(id(flow_pv_battery), 15);
+                } else {
+                  lv_obj_add_flag(id(flow_pv_battery), LV_OBJ_FLAG_HIDDEN);
+                }
+                
+                bool show_home_heating = id(heating_rod_daily_energy).has_state() && !isnan(id(heating_rod_daily_energy).state) && id(heating_rod_daily_energy).state > 0.0;
+                if (show_home_heating) {
+                  lv_obj_clear_flag(id(flow_home_heating), LV_OBJ_FLAG_HIDDEN);
+                  
+                  home_heating_pos = (home_heating_pos + 1) % 45;
+                  
+                  // Diagonal movement from 365,205 to 320,160 (center of heating rod circle)
+                  // Delta x = -45, Delta y = -45
+                  
+                  lv_obj_set_x(id(flow_home_heating), 365 - home_heating_pos);
+                  lv_obj_set_y(id(flow_home_heating), 205 - home_heating_pos);
+                  lv_obj_set_width(id(flow_home_heating), 8);
+                  lv_obj_set_height(id(flow_home_heating), 8);
+                  
+                } else {
+                  lv_obj_add_flag(id(flow_home_heating), LV_OBJ_FLAG_HIDDEN);
+                }
 

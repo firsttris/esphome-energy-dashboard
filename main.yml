@@ -19,3 +19,4 @@ esphome:
 <<: !include ui/loading.yml
 <<: !include ui/layout.yml
 <<: !include ui/animations.yml
+<<: !include ui/power_table_updates.yml
