@@ -83,6 +83,66 @@ lvgl:
     - id: main_page
       bg_color: 0x1a1a1a
       widgets:
+        # === Info Box (Unten Links) ===
+        - obj:
+            x: 10
+            y: 350
+            width: 160
+            height: 90
+            bg_color: 0x222222
+            radius: 8
+            border_width: 1
+            border_color: 0x444444
+            scrollbar_mode: "off"
+            widgets:
+              # Haus Verbrauch
+              - label:
+                  x: 5
+                  y: 5
+                  text: "Verbrauch:"
+                  text_font: roboto_14
+                  text_color: 0xAAAAAA
+              - label:
+                  id: lbl_home_consumption
+                  align: TOP_RIGHT
+                  x: -5
+                  y: 5
+                  text: "-- W"
+                  text_font: roboto_14
+                  text_color: 0xFFFFFF
+
+              # Netz Leistung
+              - label:
+                  x: 5
+                  y: 30
+                  text: "Netzbezug:"
+                  text_font: roboto_14
+                  text_color: 0xAAAAAA
+              - label:
+                  id: lbl_grid_power
+                  align: TOP_RIGHT
+                  x: -5
+                  y: 30
+                  text: "-- W"
+                  text_font: roboto_14
+                  text_color: 0xFFFFFF
+
+              # PV Überschuss
+              - label:
+                  x: 5
+                  y: 55
+                  text: "Ueberschuss:"
+                  text_font: roboto_14
+                  text_color: 0xAAAAAA
+              - label:
+                  id: lbl_pv_surplus
+                  align: TOP_RIGHT
+                  x: -5
+                  y: 55
+                  text: "-- W"
+                  text_font: roboto_14
+                  text_color: 0xFFFFFF
+
         # === Energiefluss Linien (eckig/rechtwinklig) ===
         
         # PV -> Home (vertikal runter, dann horizontal rechts ins Haus)

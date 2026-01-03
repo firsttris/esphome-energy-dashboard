@@ -54,6 +54,21 @@ sensor:
     entity_id: sensor.wasser_tagesverbrauch
     internal: true
 
+  - platform: homeassistant
+    id: current_home_consumption
+    entity_id: sensor.hauverbrauch
+    internal: true
+    
+  - platform: homeassistant
+    id: current_grid_power
+    entity_id: sensor.deye_wechselrichter_deye_netz_gesamtleistung
+    internal: true
+    
+  - platform: homeassistant
+    id: current_pv_surplus
+    entity_id: sensor.pv_uberschuss
+    internal: true
+
 # Zeit von Home Assistant
 time:
   - platform: homeassistant
