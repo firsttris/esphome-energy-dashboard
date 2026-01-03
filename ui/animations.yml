@@ -180,17 +180,23 @@ interval:
           lv_obj_set_width(id(flow_water), 4);
           lv_obj_set_height(id(flow_water), 15);
           
-          grid_battery_pos = (grid_battery_pos + 2) % 215;
-          if (grid_battery_pos < 75) {
-            lv_obj_set_x(id(flow_grid_battery), 130 + grid_battery_pos);
-            lv_obj_set_y(id(flow_grid_battery), 258);
-            lv_obj_set_width(id(flow_grid_battery), 15);
-            lv_obj_set_height(id(flow_grid_battery), 4);
+          bool show_grid_battery = !show_pv_home && (id(battery_charge).has_state() && !isnan(id(battery_charge).state) && id(battery_charge).state > 0.0);
+          if (show_grid_battery) {
+            lv_obj_clear_flag(id(flow_grid_battery), LV_OBJ_FLAG_HIDDEN);
+            grid_battery_pos = (grid_battery_pos + 2) % 215;
+            if (grid_battery_pos < 75) {
+              lv_obj_set_x(id(flow_grid_battery), 130 + grid_battery_pos);
+              lv_obj_set_y(id(flow_grid_battery), 258);
+              lv_obj_set_width(id(flow_grid_battery), 15);
+              lv_obj_set_height(id(flow_grid_battery), 4);
+            } else {
+              lv_obj_set_x(id(flow_grid_battery), 218);
+              lv_obj_set_y(id(flow_grid_battery), 260 + grid_battery_pos - 75);
+              lv_obj_set_width(id(flow_grid_battery), 4);
+              lv_obj_set_height(id(flow_grid_battery), 15);
+            }
           } else {
-            lv_obj_set_x(id(flow_grid_battery), 218);
-            lv_obj_set_y(id(flow_grid_battery), 260 + grid_battery_pos - 75);
-            lv_obj_set_width(id(flow_grid_battery), 4);
-            lv_obj_set_height(id(flow_grid_battery), 15);
+            lv_obj_add_flag(id(flow_grid_battery), LV_OBJ_FLAG_HIDDEN);
           }
           
           bool show_pv_grid = id(grid_feed_in).has_state() && !isnan(id(grid_feed_in).state) && id(grid_feed_in).state > 0.0;
