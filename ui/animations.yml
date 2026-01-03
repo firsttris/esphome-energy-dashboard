@@ -23,6 +23,8 @@ interval:
             snprintf(buf, sizeof(buf), "%s. %02d.%02d.", wochentage[dow - 1], time.day_of_month, time.month);
             return buf;
 
+      - delay: 0.1s
+
       # Update Top Left Info Box
       - lvgl.label.update:
           id: lbl_home_consumption
@@ -45,6 +47,8 @@ interval:
             snprintf(buf, sizeof(buf), "%.0f W", id(current_pv_surplus).has_state() && !isnan(id(current_pv_surplus).state) ? id(current_pv_surplus).state : 0.0);
             return buf;
 
+      - delay: 0.1s
+
       - lvgl.label.update:
           id: pv_value
           text: !lambda |-
@@ -65,6 +69,8 @@ interval:
             static char buf[20];
             snprintf(buf, sizeof(buf), "%6.2f kWh", id(grid_feed_in).has_state() && !isnan(id(grid_feed_in).state) ? id(grid_feed_in).state : 0.0);
             return buf;
+
+      - delay: 0.1s
       
       - lvgl.label.update:
           id: home_value
@@ -86,6 +92,8 @@ interval:
             static char buf[20];
             snprintf(buf, sizeof(buf), "%.2f kWh", id(battery_discharge).has_state() && !isnan(id(battery_discharge).state) ? id(battery_discharge).state : 0.0);
             return buf;
+
+      - delay: 0.1s
       
       - lvgl.arc.update:
           id: battery_arc
@@ -113,7 +121,14 @@ interval:
             snprintf(buf, sizeof(buf), "%.2f", id(water_power).has_state() && !isnan(id(water_power).state) ? id(water_power).state : 0.0);
             return buf;
 
+      - delay: 0.1s
+
       - lambda: |-
+          static int last_pv_angle = -1;
+          static int last_battery_angle = -1;
+          static int last_grid_start = -1;
+          static bool last_was_hidden = false;
+
           float home = id(home_power).has_state() && !isnan(id(home_power).state) ? id(home_power).state : 0.0;
           float battery = id(battery_discharge).has_state() && !isnan(id(battery_discharge).state) ? id(battery_discharge).state : 0.0;
           float solar = id(solar_power).has_state() && !isnan(id(solar_power).state) ? id(solar_power).state : 0.0;
@@ -130,6 +145,7 @@ interval:
           float total = home;
           
           if (total > 0.001) {
+            last_was_hidden = false;
             int pv_angle = (int)((pv / total) * 360.0);
             int battery_angle = (int)((battery / total) * 360.0);
             
@@ -140,31 +156,46 @@ interval:
             if (pv_angle > 360) pv_angle = 360;
             if (pv_angle + battery_angle > 360) battery_angle = 360 - pv_angle;
             
-            if (pv_angle > 0) {
-              lv_obj_clear_flag(id(home_arc_pv), LV_OBJ_FLAG_HIDDEN);
-              lv_arc_set_angles(id(home_arc_pv), 0, pv_angle);
-            } else {
-              lv_obj_add_flag(id(home_arc_pv), LV_OBJ_FLAG_HIDDEN);
+            if (pv_angle != last_pv_angle) {
+                if (pv_angle > 0) {
+                  lv_obj_clear_flag(id(home_arc_pv), LV_OBJ_FLAG_HIDDEN);
+                  lv_arc_set_angles(id(home_arc_pv), 0, pv_angle);
+                } else {
+                  lv_obj_add_flag(id(home_arc_pv), LV_OBJ_FLAG_HIDDEN);
+                }
+                last_pv_angle = pv_angle;
             }
             
-            if (battery_angle > 0) {
-              lv_obj_clear_flag(id(home_arc_battery), LV_OBJ_FLAG_HIDDEN);
-              lv_arc_set_angles(id(home_arc_battery), pv_angle, pv_angle + battery_angle);
-            } else {
-              lv_obj_add_flag(id(home_arc_battery), LV_OBJ_FLAG_HIDDEN);
+            if (battery_angle != last_battery_angle || pv_angle != last_pv_angle) {
+                if (battery_angle > 0) {
+                  lv_obj_clear_flag(id(home_arc_battery), LV_OBJ_FLAG_HIDDEN);
+                  lv_arc_set_angles(id(home_arc_battery), pv_angle, pv_angle + battery_angle);
+                } else {
+                  lv_obj_add_flag(id(home_arc_battery), LV_OBJ_FLAG_HIDDEN);
+                }
+                last_battery_angle = battery_angle;
             }
             
             int grid_start = pv_angle + battery_angle;
-            if (grid_start < 360) {
-              lv_obj_clear_flag(id(home_arc_grid), LV_OBJ_FLAG_HIDDEN);
-              lv_arc_set_angles(id(home_arc_grid), grid_start, 360);
-            } else {
-              lv_obj_add_flag(id(home_arc_grid), LV_OBJ_FLAG_HIDDEN);
+            if (grid_start != last_grid_start) {
+                if (grid_start < 360) {
+                  lv_obj_clear_flag(id(home_arc_grid), LV_OBJ_FLAG_HIDDEN);
+                  lv_arc_set_angles(id(home_arc_grid), grid_start, 360);
+                } else {
+                  lv_obj_add_flag(id(home_arc_grid), LV_OBJ_FLAG_HIDDEN);
+                }
+                last_grid_start = grid_start;
             }
           } else {
-            lv_obj_add_flag(id(home_arc_pv), LV_OBJ_FLAG_HIDDEN);
-            lv_obj_add_flag(id(home_arc_battery), LV_OBJ_FLAG_HIDDEN);
-            lv_obj_add_flag(id(home_arc_grid), LV_OBJ_FLAG_HIDDEN);
+            if (!last_was_hidden) {
+                lv_obj_add_flag(id(home_arc_pv), LV_OBJ_FLAG_HIDDEN);
+                lv_obj_add_flag(id(home_arc_battery), LV_OBJ_FLAG_HIDDEN);
+                lv_obj_add_flag(id(home_arc_grid), LV_OBJ_FLAG_HIDDEN);
+                last_was_hidden = true;
+                last_pv_angle = -1;
+                last_battery_angle = -1;
+                last_grid_start = -1;
+            }
           }
 
 
