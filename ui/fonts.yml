@@ -24,10 +24,11 @@ font:
       "\U000F0A72",  # solar-power
       "\U000F06A5",  # power-plug (Grid)
       "\U000F02DC",  # home
-      "\U000F0079",  # battery
+      "\U000F12A3",  # battery-high
       "\U000F0238",  # flame (Gas)
       "\U000F058C",  # water
-      "\U000F0509",  # heating-coil (Heizstab)
+      "\U000F0E1C",  # water-boiler (Heizstab)
+      "\U000F0E39",  # transmission-tower (Grid)
     ]
   
   - file: "fonts/materialdesignicons-webfont.ttf"

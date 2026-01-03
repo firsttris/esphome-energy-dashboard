@@ -462,7 +462,7 @@ lvgl:
               - label:
                   align: CENTER
                   y: -15
-                  text: "\U000F06A5"
+                  text: "\U000F0E39"
                   text_font: icons_32
                   text_color: 0x00BBFF
               
@@ -520,8 +520,8 @@ lvgl:
             widgets:
               - label:
                   align: CENTER
-                  y: -12
-                  text: "\U000F0509"
+                  y: -8
+                  text: "\U000F0E1C"
                   text_font: icons_32
                   text_color: 0xFF5722
               
@@ -682,7 +682,7 @@ lvgl:
               - label:
                   align: CENTER
                   y: 0
-                  text: "\U000F0079"
+                  text: "\U000F12A3"
                   text_font: icons_32
                   text_color: 0xFF3399
               

@@ -336,7 +336,7 @@ interval:
             lv_obj_add_flag(id(flow_pv_battery), LV_OBJ_FLAG_HIDDEN);
           }
 
-          bool show_home_heating = id(current_heating_rod_power).has_state() && !isnan(id(current_heating_rod_power).state) && id(current_heating_rod_power).state > 10.0;
+          bool show_home_heating = id(heating_rod_daily_energy).has_state() && !isnan(id(heating_rod_daily_energy).state) && id(heating_rod_daily_energy).state > 0.0;
           if (show_home_heating) {
             lv_obj_clear_flag(id(flow_home_heating), LV_OBJ_FLAG_HIDDEN);
             home_heating_pos = (home_heating_pos + 2) % 17;
