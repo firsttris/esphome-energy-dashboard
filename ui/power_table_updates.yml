@@ -3,59 +3,55 @@
 interval:
   - interval: 1s
     then:
-      # Prüfen ob Power Table Seite aktiv ist
-      - if:
-          condition:
-            lambda: 'return lv_scr_act() == id(page_power_table).obj;'
-          then:
-            # Update Power Table Labels
-            - lvgl.label.update:
-                id: lbl_home_consumption
-                text: !lambda |-
-                  static char buf[16];
-                  snprintf(buf, sizeof(buf), "%.0f W", id(current_home_consumption).has_state() && !isnan(id(current_home_consumption).state) ? id(current_home_consumption).state : 0.0);
-                  return buf;
-            
-            - lvgl.label.update:
-                id: lbl_grid_power
-                text: !lambda |-
-                  static char buf[16];
-                  snprintf(buf, sizeof(buf), "%.0f W", id(current_grid_power).has_state() && !isnan(id(current_grid_power).state) ? id(current_grid_power).state : 0.0);
-                  return buf;
-            
-            - lvgl.label.update:
-                id: lbl_pv_production
-                text: !lambda |-
-                  static char buf[16];
-                  snprintf(buf, sizeof(buf), "%.0f W", id(current_solar_power).has_state() && !isnan(id(current_solar_power).state) ? id(current_solar_power).state : 0.0);
-                  return buf;
-            
-            - lvgl.label.update:
-                id: lbl_pv_surplus
-                text: !lambda |-
-                  static char buf[16];
-                  snprintf(buf, sizeof(buf), "%.0f W", id(current_pv_surplus).has_state() && !isnan(id(current_pv_surplus).state) ? id(current_pv_surplus).state : 0.0);
-                  return buf;
+      - logger.log: "Updating power table labels (no condition)"
+      # Update Power Table Labels
+      - lvgl.label.update:
+          id: lbl_home_consumption
+          text: !lambda |-
+            static char buf[16];
+            snprintf(buf, sizeof(buf), "%.0f W", id(current_home_consumption).has_state() && !isnan(id(current_home_consumption).state) ? id(current_home_consumption).state : 0.0);
+            return buf;
+      
+      - lvgl.label.update:
+          id: lbl_grid_power
+          text: !lambda |-
+            static char buf[16];
+            snprintf(buf, sizeof(buf), "%.0f W", id(current_grid_power).has_state() && !isnan(id(current_grid_power).state) ? id(current_grid_power).state : 0.0);
+            return buf;
+      
+      - lvgl.label.update:
+          id: lbl_pv_production
+          text: !lambda |-
+            static char buf[16];
+            snprintf(buf, sizeof(buf), "%.0f W", id(current_solar_power).has_state() && !isnan(id(current_solar_power).state) ? id(current_solar_power).state : 0.0);
+            return buf;
+      
+      - lvgl.label.update:
+          id: lbl_pv_surplus
+          text: !lambda |-
+            static char buf[16];
+            snprintf(buf, sizeof(buf), "%.0f W", id(current_pv_surplus).has_state() && !isnan(id(current_pv_surplus).state) ? id(current_pv_surplus).state : 0.0);
+            return buf;
 
-            - lvgl.label.update:
-                id: lbl_heating_rod
-                text: !lambda |-
-                  static char buf[16];
-                  snprintf(buf, sizeof(buf), "%.0f W", id(current_heating_rod_power).has_state() && !isnan(id(current_heating_rod_power).state) ? id(current_heating_rod_power).state : 0.0);
-                  return buf;
+      - lvgl.label.update:
+          id: lbl_heating_rod
+          text: !lambda |-
+            static char buf[16];
+            snprintf(buf, sizeof(buf), "%.0f W", id(current_heating_rod_power).has_state() && !isnan(id(current_heating_rod_power).state) ? id(current_heating_rod_power).state : 0.0);
+            return buf;
 
-            - lvgl.label.update:
-                id: lbl_battery_charge
-                text: !lambda |-
-                  static char buf[16];
-                  snprintf(buf, sizeof(buf), "%.0f W", id(current_battery_charge_power).has_state() && !isnan(id(current_battery_charge_power).state) ? id(current_battery_charge_power).state : 0.0);
-                  return buf;
+      - lvgl.label.update:
+          id: lbl_battery_charge
+          text: !lambda |-
+            static char buf[16];
+            snprintf(buf, sizeof(buf), "%.0f W", id(current_battery_charge_power).has_state() && !isnan(id(current_battery_charge_power).state) ? id(current_battery_charge_power).state : 0.0);
+            return buf;
 
-            - lvgl.label.update:
-                id: lbl_battery_discharge
-                text: !lambda |-
-                  static char buf[16];
-                  snprintf(buf, sizeof(buf), "%.0f W", id(current_battery_discharge_power).has_state() && !isnan(id(current_battery_discharge_power).state) ? id(current_battery_discharge_power).state : 0.0);
-                  return buf;
+      - lvgl.label.update:
+          id: lbl_battery_discharge
+          text: !lambda |-
+            static char buf[16];
+            snprintf(buf, sizeof(buf), "%.0f W", id(current_battery_discharge_power).has_state() && !isnan(id(current_battery_discharge_power).state) ? id(current_battery_discharge_power).state : 0.0);
+            return buf;
 
 
