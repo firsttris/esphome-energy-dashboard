@@ -1,100 +1,98 @@
-# ESPHome Energie Dashboard
+# ESPHome Energy Dashboard
 
-Ein modulares ESPHome-Projekt, das die tägliche Energieverteilung ähnlich wie in Home Assistant visualisiert, mit Echtzeit-Daten zu Solarproduktion, Netzbezug/-einspeisung, Batteriestatus und Gasverbrauch, auf dem [Guition-ESP32-S3-4848S040](https://devices.esphome.io/devices/guition-esp32-s3-4848s040/) Display.
+A modular ESPHome project that visualizes daily energy distribution similar to Home Assistant, with real-time data on solar production, grid consumption/feed-in, battery status, and gas consumption, on the [Guition-ESP32-S3-4848S040](https://devices.esphome.io/devices/guition-esp32-s3-4848s040/) display.
 
-## Voraussetzungen
+## Prerequisites
 
-- **Hardware**: Guition-ESP32-S3-4848S040 (ESP32-S3 mit 4.8" IPS-Touch-Display)
+- **Hardware**: Guition-ESP32-S3-4848S040 (ESP32-S3 with 4.8" IPS touch display)
 - **Software**:
-  - Docker und Docker-Compose
-  - ESPHome (läuft im Container)
-  - Home Assistant (für Sensordaten)
-- **USB-Kabel**: Für das initiale Flashen des ESP32
+  - Docker and Docker-Compose
+  - ESPHome (runs in container)
+  - Home Assistant (for sensor data)
 
-## Installation und Setup
+## Installation and Setup
 
-### 1. Repository klonen
+### 1. Clone the Repository
 
 ```bash
-git clone https://github.com/dein-username/esphome-energy-dashboard.git
+git clone https://github.com/your-username/esphome-energy-dashboard.git
 cd esphome-energy-dashboard
 ```
 
-### 2. Secrets konfigurieren
+### 2. Configure Secrets
 
-Erstelle oder bearbeite die Datei `secrets.yaml` und füge deine eigenen Werte ein:
+Create or edit the `secrets.yaml` file and add your own values:
 
 ```yaml
-wifi_ssid: "Dein_WLAN_Name"
-wifi_password: "Dein_WLAN_Passwort"
-api_key: "Dein_ESPHOME_API_Schluessel"  # Generiere einen sicheren Schlüssel
+wifi_ssid: "Your_WiFi_Name"
+wifi_password: "Your_WiFi_Password"
+api_key: "Your_ESPHOME_API_Key"  # Generate a secure key
 ```
 
-**Wichtig**: Verwende einen starken API-Schlüssel (z.B. 32 Zeichen lang). Du kannst einen mit `openssl rand -base64 32` generieren.
+**Important**: Use a strong API key (e.g., 32 characters long). You can generate one with `openssl rand -base64 32`.
 
-### 3. Docker-Compose starten
+### 3. Customize the Project and Adjust Entities
 
-Starte den ESPHome-Container im Hintergrund:
+Customize the Projekt to your requirements
+Ensure that the entity IDs in `sensors/homeassistant.yml` match your HA sensors. Example entities:
+
+- `sensor.deye_inverter_deye_daily_production` (Solar production)
+- `sensor.electricity_daily_consumption` (Home consumption)
+- `sensor.deye_inverter_deye_battery_soc` (Battery SOC)
+
+The dashboard should work regardless of whether the sensors exist or not.
+
+Note: The dashboard requires sensors that accumulate daily consumption values, similar to Home Assistant's energy distribution feature. While Home Assistant typically uses total meters, here daily meters are needed. Since the daily accumulated values from the energy dashboard are not accessible, I created utility meters in Home Assistant for daily consumption.
+
+### 4. Start Docker-Compose
+
+Start the ESPHome container in the background:
 
 ```bash
 docker-compose up -d
 ```
 
-Der Container mountet das Config-Verzeichnis und läuft im Host-Netzwerkmodus für einfachen Zugriff.
+The container mounts the config directory and runs in host network mode for easy access.
 
-### 4. Firmware kompilieren und flashen
+### 5. Compile and Flash Firmware
 
-Verbinde deinen ESP32 über USB und flash die Firmware:
+Connect your ESP32 via USB and flash the firmware:
 
 ```bash
-docker-compose exec esphome 
-
-esphome run main.yml --device=/dev/ttyUSB0
+docker-compose exec esphome esphome run main.yml --device=/dev/ttyUSB0
 ```
 
-**Hinweise**:
-- Passe den Device-Pfad (`/dev/ttyUSB0`) an deinen System an (z.B. `/dev/ttyACM0` auf manchen Linux-Systemen).
-- Stelle sicher, dass dein Benutzer Zugriff auf den USB-Port hat (ggf. `sudo` verwenden oder udev-Regeln anpassen).
-- Beim ersten Flash wird die Firmware kompiliert – das kann einige Minuten dauern.
+**Notes**:
+- Adjust the device path (`/dev/ttyUSB0`) to your system (e.g., `/dev/ttyACM0` on some Linux systems).
+- Ensure your user has access to the USB port (use `sudo` if necessary or adjust udev rules).
+- The first flash will compile the firmware – this may take several minutes.
 
-### 5. Home Assistant Integration
+Adjust the entity IDs as needed.
 
-Nach dem Flashen verbindet sich das Gerät automatisch mit deinem WLAN und Home Assistant. Stelle sicher, dass die Entity-IDs in `sensors/homeassistant.yml` mit deinen HA-Sensoren übereinstimmen. Beispiel-Entities:
+## Usage
 
-- `sensor.deye_wechselrichter_deye_tagliche_produktion` (Solarproduktion)
-- `sensor.strom_tagesverbrauch` (Hausverbrauch)
-- `sensor.deye_wechselrichter_deye_batterie_soc` (Batterie SOC)
+After successful startup, the display shows a loading screen followed by the main dashboard. Touch the screen to switch between dashboard and detailed power table.
 
-Passe die Entity-IDs bei Bedarf an.
+- **Dashboard**: Overview with energy flow diagrams and current values.
+- **Power Table**: Detailed table with historical data.
 
-## Verwendung
+The backlight turns off during OTA updates and can be controlled via Home Assistant.
 
-Nach dem erfolgreichen Start zeigt das Display ein Loading-Screen, gefolgt vom Haupt-Dashboard. Berühre den Bildschirm, um zwischen Dashboard und detaillierter Power-Tabelle zu wechseln.
+## Customize Configuration
 
-- **Dashboard**: Übersicht mit Energiefluss-Diagrammen und aktuellen Werten.
-- **Power-Tabelle**: Detaillierte Tabelle mit historischen Daten.
+The configuration is modular:
 
-Das Backlight schaltet sich bei OTA-Updates aus und kann über Home Assistant gesteuert werden.
-
-## Konfiguration anpassen
-
-Die Konfiguration ist modular aufgebaut:
-
-- `base/hardware.yml`: Hardware-spezifische Einstellungen (Display, I2C, SPI)
+- `base/hardware.yml`: Hardware-specific settings (display, I2C, SPI)
 - `base/network.yml`: WiFi, API, OTA
-- `sensors/homeassistant.yml`: HA-Sensoren
-- `ui/*.yml`: UI-Komponenten (Fonts, Layout, Animationen)
+- `sensors/homeassistant.yml`: HA sensors
+- `ui/*.yml`: UI components (fonts, layout, animations)
 
-Bearbeite diese Dateien nach Bedarf und kompiliere neu mit `esphome compile main.yml`.
+Edit these files as needed and recompile with `esphome compile main.yml`.
 
-## Beiträge
+## Contributions
 
-Beiträge sind willkommen! Erstelle Issues für Bugs oder Feature-Requests, oder sende Pull-Requests.
+Contributions are welcome! Create issues for bugs or feature requests, or submit pull requests.
 
-## Lizenz
+## License
 
-Dieses Projekt ist unter der MIT-Lizenz lizenziert. Siehe [LICENSE](LICENSE) für Details.
-
-## Screenshots
-
-*(Füge hier Screenshots des Dashboards hinzu, wenn verfügbar)*
+This project is licensed under the MIT License. See [LICENSE](LICENSE) for details.
