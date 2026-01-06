@@ -6,9 +6,8 @@ A modular ESPHome project that visualizes daily energy distribution similar to H
 
 - **Hardware**: Guition-ESP32-S3-4848S040 (ESP32-S3 with 4.8" IPS touch display)
 - **Software**:
-  - Docker and Docker-Compose
-  - ESPHome (runs in container)
-  - Home Assistant (for sensor data)
+  - ESPHome (lokal or container)
+  - Home Assistant with ESPHome Integration (for sensor data)
 
 ## Installation and Setup
 
@@ -59,7 +58,9 @@ The container mounts the config directory and runs in host network mode for easy
 Connect your ESP32 via USB and flash the firmware:
 
 ```bash
-docker-compose exec esphome esphome run main.yml --device=/dev/ttyUSB0
+docker-compose exec esphome 
+
+esphome run main.yml --device=/dev/ttyUSB0
 ```
 
 **Notes**:
@@ -86,8 +87,6 @@ The configuration is modular:
 - `base/network.yml`: WiFi, API, OTA
 - `sensors/homeassistant.yml`: HA sensors
 - `ui/*.yml`: UI components (fonts, layout, animations)
-
-Edit these files as needed and recompile with `esphome compile main.yml`.
 
 ## Contributions
 
