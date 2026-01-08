@@ -153,7 +153,6 @@ interval:
                       } else {
                         lv_obj_add_flag(id(home_arc_pv), LV_OBJ_FLAG_HIDDEN);
                       }
-                      last_pv_angle = pv_angle;
                   }
                   
                   if (battery_angle != last_battery_angle || pv_angle != last_pv_angle) {
@@ -165,6 +164,8 @@ interval:
                       }
                       last_battery_angle = battery_angle;
                   }
+                  
+                  last_pv_angle = pv_angle;
                   
                   int grid_start = pv_angle + battery_angle;
                   if (grid_start != last_grid_start) {
