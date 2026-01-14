@@ -2,13 +2,19 @@
 
 A modular ESPHome project that visualizes daily energy distribution similar to Home Assistant, with real-time data on solar production, grid consumption/feed-in, battery status, and gas consumption, on the [Guition-ESP32-S3-4848S040](https://devices.esphome.io/devices/guition-esp32-s3-4848s040/) display.
 
+The first page shows daily accumulated energy consumption similar to Home Assistant's energy distribution.
+
 <img src="docs/screenshot.jpg" width="400" alt="Energy Dashboard Screenshot">
+
+Tap the screen to transition to a second page showing the current load.
+
+<img src="docs/screenshot-page2.png" width="400" alt="Current Load">
 
 ## Prerequisites
 
 - **Hardware**: Guition-ESP32-S3-4848S040 (ESP32-S3 with 4.8" IPS touch display)
 - **Software**:
-  - ESPHome (lokal or container)
+  - ESPHome (local or container)
   - Home Assistant with ESPHome Integration (for sensor data)
 
 ## Installation and Setup
@@ -34,7 +40,7 @@ api_key: "Your_ESPHOME_API_Key"  # Generate a secure key
 
 ### 3. Customize the Project and Adjust Entities
 
-Customize the Projekt to your requirements
+Customize the project to your requirements.
 Ensure that the entity IDs in `sensors/homeassistant.yml` match your HA sensors. Example entities:
 
 - `sensor.deye_inverter_deye_daily_production` (Solar production)
