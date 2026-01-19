@@ -252,6 +252,8 @@ The configuration is modular for easy customization:
 | 🖥️ [Guition ESP32-S3-4848S040](https://devices.esphome.io/devices/guition-esp32-s3-4848s040/) | Device information |
 | 🔋 [Energy Dashboard](https://www.home-assistant.io/docs/energy/) | Home Assistant Energy Dashboard |
 
+---
+
 <div align="center">
 
 **Made by the open source community**
