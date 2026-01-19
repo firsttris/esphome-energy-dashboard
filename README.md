@@ -243,15 +243,6 @@ The configuration is modular for easy customization:
 └── docs/                       # Documentation & screenshots
 ```
 
-## 🤝 Contributions
-
-Contributions are welcome! 
-
-- 🐛 **Bug Reports**: [Create an issue](../../issues)
-- 💡 **Feature Requests**: [Suggest new features](../../issues)
-- 🔧 **Pull Requests**: Submit your improvements
-
-
 ## 📚 Further Resources
 
 | Resource | Description |
