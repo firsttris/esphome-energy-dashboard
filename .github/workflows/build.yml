@@ -1,0 +1,34 @@
+name: Build firmware
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install ESPHome
+        run: pip install esphome
+
+      - name: Create dummy secrets
+        run: |
+          cat > secrets.yaml <<EOS
+          wifi_ssid: "ci"
+          wifi_password: "ci-password"
+          api_key: "$(openssl rand -base64 32)"
+          fallback_password: "ci-password"
+          EOS
+
+      - name: Validate config
+        run: esphome config main.yml > /dev/null
+
+      - name: Compile
+        run: esphome compile main.yml

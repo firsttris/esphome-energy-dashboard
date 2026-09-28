@@ -1,0 +1,201 @@
+# Verknüpft Sensoren mit der Anzeige.
+# Labels werden nur aktualisiert, wenn ein neuer Wert kommt (kein Polling).
+
+sensor:
+  # === Tageswerte (Dashboard) ===
+  - id: !extend solar_power
+    on_value:
+      - lvgl.label.update:
+          id: pv_value
+          text:
+            format: "%.2f"
+            args: ['std::isnan(x) ? 0.0f : x']
+      - script.execute: update_home_ring
+
+  - id: !extend grid_power
+    on_value:
+      - lvgl.label.update:
+          id: grid_bezug_label
+          text:
+            format: "%6.2f kWh"
+            args: ['std::isnan(x) ? 0.0f : x']
+
+  - id: !extend grid_feed_in
+    on_value:
+      - lvgl.label.update:
+          id: grid_einspeisung_label
+          text:
+            format: "%6.2f kWh"
+            args: ['std::isnan(x) ? 0.0f : x']
+      - script.execute: update_home_ring
+
+  - id: !extend home_power
+    on_value:
+      - lvgl.label.update:
+          id: home_value
+          text:
+            format: "%.2f"
+            args: ['std::isnan(x) ? 0.0f : x']
+      - script.execute: update_home_ring
+
+  - id: !extend battery_soc
+    on_value:
+      - lvgl.arc.update:
+          id: battery_arc
+          value: !lambda 'return std::isnan(x) ? 0 : (int) x;'
+      - lvgl.label.update:
+          id: battery_soc_label
+          text:
+            format: "%d%%"
+            args: ['std::isnan(x) ? 0 : (int) x']
+
+  - id: !extend battery_charge
+    on_value:
+      - lvgl.label.update:
+          id: battery_charge_label
+          text:
+            format: "%.2f kWh"
+            args: ['std::isnan(x) ? 0.0f : x']
+      - script.execute: update_home_ring
+
+  - id: !extend battery_discharge
+    on_value:
+      - lvgl.label.update:
+          id: battery_discharge_label
+          text:
+            format: "%.2f kWh"
+            args: ['std::isnan(x) ? 0.0f : x']
+      - script.execute: update_home_ring
+
+  - id: !extend gas_power
+    on_value:
+      - lambda: 'dashboard::gas_activity.feed(x);'
+      - lvgl.label.update:
+          id: gas_value
+          text:
+            format: "%.2f"
+            args: ['std::isnan(x) ? 0.0f : x']
+
+  - id: !extend water_power
+    on_value:
+      - lambda: 'dashboard::water_activity.feed(x);'
+      - lvgl.label.update:
+          id: water_value
+          text:
+            format: "%.2f"
+            args: ['std::isnan(x) ? 0.0f : x']
+
+  - id: !extend heating_rod_daily_energy
+    on_value:
+      - lvgl.label.update:
+          id: heating_rod_value
+          text:
+            format: "%.2f"
+            args: ['std::isnan(x) ? 0.0f : x']
+
+  # === Aktuelle Leistung (Tabelle) ===
+  - id: !extend current_home_consumption
+    on_value:
+      - lvgl.label.update:
+          id: lbl_home_consumption
+          text:
+            format: "%.0f W"
+            args: ['std::isnan(x) ? 0.0f : x']
+
+  - id: !extend current_grid_power
+    on_value:
+      - lvgl.label.update:
+          id: lbl_grid_power
+          text:
+            format: "%s %.0f W"
+            args: ['x < 0 ? "Einspeisung" : "Bezug"', 'std::isnan(x) ? 0.0f : std::fabs(x)']
+
+  - id: !extend current_solar_power
+    on_value:
+      - lvgl.label.update:
+          id: lbl_pv_production
+          text:
+            format: "%.0f W"
+            args: ['std::isnan(x) ? 0.0f : x']
+
+  - id: !extend current_pv_surplus
+    on_value:
+      - lvgl.label.update:
+          id: lbl_pv_surplus
+          text:
+            format: "%.0f W"
+            args: ['std::isnan(x) ? 0.0f : x']
+
+  - id: !extend current_battery_power
+    on_value:
+      - lvgl.label.update:
+          id: lbl_battery_power
+          text:
+            format: "%s %.0f W"
+            args: ['x < 0 ? "Laden" : "Entladen"', 'std::isnan(x) ? 0.0f : std::fabs(x)']
+
+  - id: !extend current_heating_rod_power
+    on_value:
+      - lvgl.label.update:
+          id: lbl_heating_rod
+          text:
+            format: "%.0f W"
+            args: ['std::isnan(x) ? 0.0f : x']
+
+time:
+  - id: !extend ha_time
+    on_time_sync:
+      - script.execute: update_clock
+    on_time:
+      - seconds: 0
+        then:
+          - script.execute: update_clock
+
+script:
+  - id: update_clock
+    then:
+      - lambda: |-
+          auto now = id(ha_time).now();
+          if (!now.is_valid())
+            return;
+          static const char *const wochentage[] = {"So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"};
+          int dow = now.day_of_week;  // 1 = Sonntag
+          if (dow < 1 || dow > 7)
+            dow = 1;
+          char buf[20];
+          snprintf(buf, sizeof(buf), "%02d:%02d", now.hour, now.minute);
+          lv_label_set_text(id(time_label), buf);
+          snprintf(buf, sizeof(buf), "%s. %02d.%02d.", wochentage[dow - 1], now.day_of_month, now.month);
+          lv_label_set_text(id(date_label), buf);
+
+  # Ring um das Haus: Anteil von PV-Eigenverbrauch, Batterie und Netz am Tagesverbrauch
+  - id: update_home_ring
+    then:
+      - lambda: |-
+          using dashboard::value_or_zero;
+          float home = std::max(value_or_zero(id(home_power)), 0.0f);
+          float battery = std::max(value_or_zero(id(battery_discharge)), 0.0f);
+          // PV-Eigenverbrauch = Erzeugung - Einspeisung - Batterieladung
+          float pv = value_or_zero(id(solar_power)) - value_or_zero(id(grid_feed_in)) - value_or_zero(id(battery_charge));
+          pv = std::clamp(pv, 0.0f, home);
+
+          if (home <= 0.001f) {
+            dashboard::set_arc_segment(id(home_arc_pv), 0, 0);
+            dashboard::set_arc_segment(id(home_arc_battery), 0, 0);
+            dashboard::set_arc_segment(id(home_arc_grid), 0, 0);
+            return;
+          }
+
+          int pv_angle = (int) (pv / home * 360.0f);
+          int battery_angle = (int) (battery / home * 360.0f);
+          // Kleine Anteile trotzdem sichtbar machen
+          if (pv > 0.01f && pv_angle < 10)
+            pv_angle = 10;
+          if (battery > 0.01f && battery_angle < 10)
+            battery_angle = 10;
+          pv_angle = std::min(pv_angle, 360);
+          battery_angle = std::min(battery_angle, 360 - pv_angle);
+
+          dashboard::set_arc_segment(id(home_arc_pv), 0, pv_angle);
+          dashboard::set_arc_segment(id(home_arc_battery), pv_angle, pv_angle + battery_angle);
+          dashboard::set_arc_segment(id(home_arc_grid), pv_angle + battery_angle, 360);

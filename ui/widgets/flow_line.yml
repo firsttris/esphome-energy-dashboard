@@ -1,0 +1,9 @@
+# Statische Leitung zwischen zwei Knoten
+# Variablen: p1, p2, color
+line:
+  points:
+    - ${p1}
+    - ${p2}
+  line_color: ${color}
+  line_width: 3
+  line_rounded: false

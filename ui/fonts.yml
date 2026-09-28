@@ -4,37 +4,36 @@ font:
   - file: "gfonts://Roboto"
     id: roboto_12
     size: 12
-    glyphs: " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~°ÄÖÜäöüß"
-  
+    glyphs: &latin_glyphs " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~°²³ÄÖÜäöüß"
+
   - file: "gfonts://Roboto"
     id: roboto_14
     size: 14
-    glyphs: " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~°ÄÖÜäöüß"
-  
+    glyphs: *latin_glyphs
+
   - file: "gfonts://Roboto"
     id: roboto_16
     size: 16
-    glyphs: " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~°ÄÖÜäöüß"
-  
+    glyphs: *latin_glyphs
+
   - file: "gfonts://Roboto"
     id: roboto_24
     size: 24
-    glyphs: " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~°ÄÖÜäöüß"
-  
+    glyphs: *latin_glyphs
+
   - file: "fonts/materialdesignicons-webfont.ttf"
     id: icons_32
     size: 32
     glyphs: [
       "\U000F0A72",  # solar-power
-      "\U000F06A5",  # power-plug (Grid)
       "\U000F02DC",  # home
       "\U000F12A3",  # battery-high
-      "\U000F0238",  # flame (Gas)
+      "\U000F0238",  # fire (Gas)
       "\U000F058C",  # water
       "\U000F0F92",  # water-boiler (Heizstab)
-      "\U000F0D3E",  # transmission-tower (Grid)
+      "\U000F0D3E",  # transmission-tower (Netz)
     ]
-  
+
   - file: "fonts/materialdesignicons-webfont.ttf"
     id: icons_16
     size: 16
@@ -43,4 +42,5 @@ font:
       "\U000F005D",  # arrow-up
       "\U000F0054",  # arrow-right
       "\U000F004D",  # arrow-left
+      "\U000F0164",  # cloud-off-outline (Offline-Hinweis)
     ]

@@ -1,0 +1,53 @@
+# Hintergrundbeleuchtung inkl. automatischem Dimmen bei Inaktivität
+
+globals:
+  - id: display_dimmed
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+  - id: brightness_before_dim
+    type: float
+    restore_value: no
+    initial_value: '1.0'
+
+output:
+  - platform: ledc
+    id: backlight_output
+    pin: GPIO38
+    frequency: 150Hz
+    min_power: 0.01
+    zero_means_zero: true
+
+light:
+  - platform: monochromatic
+    name: "Backlight"
+    id: display_backlight
+    output: backlight_output
+    restore_mode: ALWAYS_ON
+    default_transition_length: 1s
+
+script:
+  # Wird von lvgl.on_idle ausgelöst (siehe ui/layout.yml)
+  - id: dim_display
+    then:
+      - if:
+          condition:
+            lambda: 'return !id(display_dimmed) && id(display_backlight).remote_values.is_on();'
+          then:
+            - lambda: |-
+                id(brightness_before_dim) = id(display_backlight).remote_values.get_brightness();
+                id(display_dimmed) = true;
+            - light.turn_on:
+                id: display_backlight
+                brightness: ${idle_brightness}
+                transition_length: 2s
+
+  - id: wake_display
+    then:
+      - globals.set:
+          id: display_dimmed
+          value: 'false'
+      - light.turn_on:
+          id: display_backlight
+          brightness: !lambda 'return id(brightness_before_dim);'
+          transition_length: 300ms

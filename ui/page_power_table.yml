@@ -14,8 +14,9 @@ widgets:
     # === Haupttabelle ===
     - obj:
         align: CENTER
+        y: 20
         width: 400
-        height: 360
+        height: SIZE_CONTENT
         bg_color: 0x222222
         radius: 12
         border_width: 2
@@ -23,130 +24,14 @@ widgets:
         scrollbar_mode: "off"
         scrollable: false
         pad_all: 20
+        layout:
+          type: flex
+          flex_flow: COLUMN
+          pad_row: 14
         widgets:
-          # === Haus Verbrauch ===
-          - label:
-              x: 0
-              y: 10
-              text: "Hausverbrauch:"
-              text_font: roboto_16
-              text_color: 0x00FF99
-          
-          - label:
-              id: lbl_home_consumption
-              align: TOP_RIGHT
-              x: 0
-              y: 10
-              text: "-- W"
-              text_font: roboto_16
-              text_color: 0x00FF99
-
-          # Trennlinie 1
-          - obj:
-              x: 0
-              y: 45
-              width: 360
-              height: 2
-              bg_color: 0x333333
-              border_width: 0
-              radius: 0
-
-          # === Netzbezug ===
-          - label:
-              x: 0
-              y: 60
-              text: "Netzbezug:"
-              text_font: roboto_16
-              text_color: 0x00BBFF
-          
-          - label:
-              id: lbl_grid_power
-              align: TOP_RIGHT
-              x: 0
-              y: 60
-              text: "-- W"
-              text_font: roboto_16
-              text_color: 0x00BBFF
-
-          # Trennlinie 2
-          - obj:
-              x: 0
-              y: 95
-              width: 360
-              height: 2
-              bg_color: 0x333333
-              border_width: 0
-              radius: 0
-
-          # === PV Erzeugung ===
-          - label:
-              x: 0
-              y: 110
-              text: "PV Erzeugung:"
-              text_font: roboto_16
-              text_color: 0xFFBB33
-          
-          - label:
-              id: lbl_pv_production
-              align: TOP_RIGHT
-              x: 0
-              y: 110
-              text: "-- W"
-              text_font: roboto_16
-              text_color: 0xFFBB33
-
-          # Trennlinie 3
-          - obj:
-              x: 0
-              y: 145
-              width: 360
-              height: 2
-              bg_color: 0x333333
-              border_width: 0
-              radius: 0
-
-          # === PV Überschuss ===
-          - label:
-              x: 0
-              y: 160
-              text: "PV Überschuss:"
-              text_font: roboto_16
-              text_color: 0xBB33FF
-          
-          - label:
-              id: lbl_pv_surplus
-              align: TOP_RIGHT
-              x: 0
-              y: 160
-              text: "-- W"
-              text_font: roboto_16
-              text_color: 0xBB33FF
-
-          # Trennlinie 4
-          - obj:
-              x: 0
-              y: 195
-              width: 360
-              height: 2
-              bg_color: 0x333333
-              border_width: 0
-              radius: 0
-
-          # === Heizstab ===
-          - label:
-              x: 0
-              y: 210
-              text: "Heizstab:"
-              text_font: roboto_16
-              text_color: 0xFF5722
-          
-          - label:
-              id: lbl_heating_rod
-              align: TOP_RIGHT
-              x: 0
-              y: 210
-              text: "-- W"
-              text_font: roboto_16
-              text_color: 0xFF5722
-
-
+          - !include { file: widgets/power_row.yml, vars: { label: "Hausverbrauch:", value_id: lbl_home_consumption, color: "0x00FF99" } }
+          - !include { file: widgets/power_row.yml, vars: { label: "Netz:", value_id: lbl_grid_power, color: "0x00BBFF" } }
+          - !include { file: widgets/power_row.yml, vars: { label: "PV Erzeugung:", value_id: lbl_pv_production, color: "0xFFBB33" } }
+          - !include { file: widgets/power_row.yml, vars: { label: "PV Überschuss:", value_id: lbl_pv_surplus, color: "0xBB33FF" } }
+          - !include { file: widgets/power_row.yml, vars: { label: "Batterie:", value_id: lbl_battery_power, color: "0xFF3399" } }
+          - !include { file: widgets/power_row.yml, vars: { label: "Heizstab:", value_id: lbl_heating_rod, color: "0xFF5722" } }

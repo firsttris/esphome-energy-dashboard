@@ -1,54 +1,50 @@
 # Home Assistant Sensoren und Zeit
+#
+# Hier nur die entity_ids an die eigene Installation anpassen.
+# Welche Anzeige welcher Sensor füttert, steht in ui/bindings.yml.
 
-# Globale Variablen
-globals:
-  - id: ha_connected
-    type: bool
-    restore_value: no
-    initial_value: 'false'
-
-# Home Assistant Sensoren
 sensor:
+  # Tageswerte (kWh bzw. m³, täglich zurückgesetzte Utility-Meter)
   - platform: homeassistant
     id: solar_power
     entity_id: sensor.deye_wechselrichter_deye_tagliche_produktion
     internal: true
-  
+
   - platform: homeassistant
     id: grid_power
     entity_id: sensor.deye_wechselrichter_deye_taglich_energie_bezogen
     internal: true
-  
+
   - platform: homeassistant
     id: grid_feed_in
     entity_id: sensor.deye_wechselrichter_deye_taglich_energie_eingespiesen
     internal: true
-  
+
   - platform: homeassistant
     id: home_power
     entity_id: sensor.strom_tagesverbrauch
     internal: true
-  
+
   - platform: homeassistant
     id: battery_soc
     entity_id: sensor.deye_wechselrichter_deye_batterie_soc
     internal: true
-  
+
   - platform: homeassistant
     id: battery_charge
     entity_id: sensor.deye_wechselrichter_deye_tagliche_batterie_ladung
     internal: true
-  
+
   - platform: homeassistant
     id: battery_discharge
     entity_id: sensor.deye_wechselrichter_deye_tagliche_batterie_entladung
     internal: true
-  
+
   - platform: homeassistant
     id: gas_power
     entity_id: sensor.gas_tagesverbrauch
     internal: true
-  
+
   - platform: homeassistant
     id: water_power
     entity_id: sensor.wasser_tagesverbrauch
@@ -59,22 +55,23 @@ sensor:
     entity_id: sensor.ac_elwa_2_energy_consumption_daily
     internal: true
 
-  # Aktuelle Leistungswerte (current)
+  # Aktuelle Leistungswerte (W) - steuern die Fluss-Animationen
   - platform: homeassistant
     id: current_home_consumption
     entity_id: sensor.hauverbrauch
     internal: true
-    
+
   - platform: homeassistant
     id: current_grid_power
+    # Positiv = Netzbezug, negativ = Einspeisung
     entity_id: sensor.deye_wechselrichter_deye_netz_gesamtleistung
     internal: true
-    
+
   - platform: homeassistant
     id: current_solar_power
     entity_id: sensor.aktuelle_pv_leistung
     internal: true
-    
+
   - platform: homeassistant
     id: current_pv_surplus
     entity_id: sensor.aktueller_pv_uberschuss
@@ -85,7 +82,11 @@ sensor:
     entity_id: sensor.ac_elwa_2_power_elwa_2
     internal: true
 
-
+  - platform: homeassistant
+    id: current_battery_power
+    # Positiv = Entladen, negativ = Laden
+    entity_id: sensor.deye_wechselrichter_deye_batterie_leistung
+    internal: true
 
 # Zeit von Home Assistant
 time:
