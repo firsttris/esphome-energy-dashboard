@@ -1,37 +1,63 @@
-# Loading Screen
+# Loading Screen & Verbindungsstatus
+
+globals:
+  - id: ha_connected
+    type: bool
+    restore_value: no
+    initial_value: 'false'
+  - id: loading_started_ms
+    type: uint32_t
+    restore_value: no
+    initial_value: '0'
 
 script:
   - id: on_ha_connected
     then:
       - lambda: |-
-          if (!id(ha_connected)) {
-            id(ha_connected) = true;
-            id(start_loading_animation).execute();
-          }
-
-  - id: start_loading_animation
-    then:
-      - lambda: |-
-          lv_obj_add_flag(id(loading_spinner), LV_OBJ_FLAG_HIDDEN);
-      - lambda: |-
-          lv_label_set_text(id(loading_status), "Verbunden!");
+          id(ha_connected) = true;
+          id(loading_started_ms) = millis();
+          lv_label_set_text(id(loading_status), "Verbunden - lade Daten...");
           lv_obj_set_style_text_color(id(loading_status), lv_color_hex(0x00FF99), 0);
-      
-      - delay: 300ms
-      - lambda: |-
-          lv_label_set_text(id(loading_status), "Lade Daten...");
-      
-      - lambda: |-
-          lv_bar_set_value(id(loading_bar), 33, LV_ANIM_ON);
-      - delay: 400ms
-      
-      - lambda: |-
-          lv_bar_set_value(id(loading_bar), 66, LV_ANIM_ON);
-      - delay: 400ms
-      
-      - lambda: |-
-          lv_bar_set_value(id(loading_bar), 100, LV_ANIM_ON);
-      - delay: 500ms
-      
-      - lambda: |-
-          lv_obj_add_flag(id(loading_overlay), LV_OBJ_FLAG_HIDDEN);
+      - lvgl.widget.hide: offline_indicator
+
+  - id: on_ha_disconnected
+    then:
+      - globals.set:
+          id: ha_connected
+          value: 'false'
+      - lvgl.widget.show: offline_indicator
+
+interval:
+  # Echter Fortschritt: zählt, wie viele Sensoren schon einen Wert geliefert haben.
+  # Fehlt ein Sensor in HA, wird der Ladebildschirm nach 10 s trotzdem geschlossen.
+  - interval: 250ms
+    then:
+      - if:
+          condition:
+            lambda: 'return id(ha_connected) && !lv_obj_has_flag(id(loading_overlay), LV_OBJ_FLAG_HIDDEN);'
+          then:
+            - lambda: |-
+                esphome::sensor::Sensor *sensors[] = {
+                  id(solar_power), id(grid_power), id(grid_feed_in), id(home_power),
+                  id(battery_soc), id(battery_charge), id(battery_discharge),
+                  id(gas_power), id(water_power), id(heating_rod_daily_energy),
+                  id(current_home_consumption), id(current_grid_power), id(current_solar_power),
+                  id(current_pv_surplus), id(current_heating_rod_power), id(current_battery_power),
+                };
+                const int total = sizeof(sensors) / sizeof(sensors[0]);
+                int received = 0;
+                for (auto *s : sensors) {
+                  if (s->has_state())
+                    received++;
+                }
+
+                char buf[32];
+                snprintf(buf, sizeof(buf), "Lade Daten... %d/%d", received, total);
+                lv_label_set_text(id(loading_status), buf);
+                lv_bar_set_value(id(loading_bar), received * 100 / total, LV_ANIM_ON);
+
+                bool timed_out = millis() - id(loading_started_ms) > 10000;
+                if (received == total || timed_out) {
+                  lv_obj_add_flag(id(loading_spinner), LV_OBJ_FLAG_HIDDEN);
+                  lv_obj_add_flag(id(loading_overlay), LV_OBJ_FLAG_HIDDEN);
+                }

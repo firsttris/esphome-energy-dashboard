@@ -18,13 +18,15 @@ A modular ESPHome project that visualizes daily energy distribution similar to H
 
 ## 📱 Features
 
-- **🔄 Energy Flow Visualization**: See your energy distribution at a glance
+- **🔄 Energy Flow Visualization**: See your energy distribution at a glance – flows animate only while power is actually flowing, and faster the more power flows
 - **☀️ Solar Production Monitoring**: Track your daily solar generation
 - **🔋 Battery Status**: Real-time battery state of charge
 - **📊 Dual Page Display**: 
   - Page 1: Daily accumulated energy consumption (Home Assistant style)
   - Page 2: Current load table with detailed breakdown
 - **👆 Touch Interface**: Simply tap the screen to switch between views
+- **🌙 Auto-Dimming**: Backlight dims after inactivity, a tap wakes it up
+- **📡 Offline Indicator**: A small cloud icon shows when Home Assistant is disconnected
 - **🎨 Modular Design**: Easy to customize and extend
 
 ## 📋 Prerequisites
@@ -35,8 +37,6 @@ A modular ESPHome project that visualizes daily energy distribution similar to H
 | **🏠 Home Assistant** | With ESPHome Integration for sensor data |
 | **💻 Software** | ESPHome (local or Docker/Podman) |
 | **🔌 Cable** | USB cable for initial flashing |
-
----
 
 ---
 
@@ -51,12 +51,17 @@ cd esphome-energy-dashboard
 
 ### 🔐 Step 2: Configure Secrets
 
-Create or edit the `secrets.yaml` file and add your own values:
+Copy the example and fill in your own values:
+
+```bash
+cp secrets.example.yaml secrets.yaml
+```
 
 ```yaml
 wifi_ssid: "Your_WiFi_Name"
 wifi_password: "Your_WiFi_Password"
-api_key: "Your_ESPHOME_API_Key"  # Generate a secure key
+api_key: "Your_ESPHOME_API_Key"          # Generate a secure key
+fallback_password: "Your_Fallback_Password"  # Password of the fallback hotspot
 ```
 
 > **💡 Important**: Use a strong API key (e.g., 32 characters long). You can generate one with:
@@ -69,15 +74,45 @@ api_key: "Your_ESPHOME_API_Key"  # Generate a secure key
 Customize the project to your requirements.
 Ensure that the entity IDs in [sensors/homeassistant.yml](sensors/homeassistant.yml) match your HA sensors:
 
-| Entity Type | Example Entity ID |
-|-------------|-------------------|
-| ☀️ **Solar Production** | `sensor.deye_inverter_deye_daily_production` |
-| 🏠 **Home Consumption** | `sensor.electricity_daily_consumption` |
-| 🔋 **Battery SOC** | `sensor.deye_inverter_deye_battery_soc` |
+**Daily values** (shown on the dashboard):
 
-> **✅ Note**: The dashboard should work regardless of whether the sensors exist or not.
+| ID | Meaning | Example Entity ID |
+|----|---------|-------------------|
+| `solar_power` | ☀️ Solar production today (kWh) | `sensor.deye_wechselrichter_deye_tagliche_produktion` |
+| `grid_power` / `grid_feed_in` | 🔌 Grid import / feed-in today (kWh) | `sensor.deye_wechselrichter_deye_taglich_energie_bezogen` |
+| `home_power` | 🏠 Home consumption today (kWh) | `sensor.strom_tagesverbrauch` |
+| `battery_soc` | 🔋 Battery state of charge (%) | `sensor.deye_wechselrichter_deye_batterie_soc` |
+| `battery_charge` / `battery_discharge` | 🔋 Battery charged / discharged today (kWh) | `sensor.deye_wechselrichter_deye_tagliche_batterie_ladung` |
+| `gas_power` / `water_power` | 🔥💧 Gas / water today (m³) | `sensor.gas_tagesverbrauch` |
+| `heating_rod_daily_energy` | ♨️ Heating rod today (kWh) | `sensor.ac_elwa_2_energy_consumption_daily` |
+
+**Current power** (drives the flow animations and the power table):
+
+| ID | Meaning | Sign convention |
+|----|---------|-----------------|
+| `current_solar_power` | ☀️ PV power (W) | |
+| `current_grid_power` | 🔌 Grid power (W) | **positive = import, negative = feed-in** |
+| `current_battery_power` | 🔋 Battery power (W) | **positive = discharging, negative = charging** |
+| `current_home_consumption` | 🏠 Home consumption (W) | |
+| `current_pv_surplus` | ☀️ PV surplus (W) | |
+| `current_heating_rod_power` | ♨️ Heating rod (W) | |
+
+> **⚠️ Sign conventions:** If your inverter reports grid or battery power the other way round, add a `multiply: -1` filter to that sensor.
+
+> **✅ Note**: The dashboard works even if some sensors don't exist – the loading screen waits at most 10 s for missing sensors.
 
 > **📊 Important**: The dashboard requires sensors that accumulate **daily consumption values**, similar to Home Assistant's energy distribution feature. While Home Assistant typically uses total meters, here daily meters are needed. Since the daily accumulated values from the energy dashboard are not accessible, I created utility meters in Home Assistant for daily consumption.
+
+### 🎛️ Optional: Tweak Behaviour
+
+The `substitutions` at the top of [main.yml](main.yml) control the behaviour:
+
+| Substitution | Default | Description |
+|--------------|---------|-------------|
+| `flow_threshold_w` | `20` | Minimum power (W) before a flow is animated |
+| `flow_full_speed_w` | `5000` | Power (W) at which the animation reaches full speed |
+| `idle_timeout` | `5min` | Time without touch before the display dims |
+| `idle_brightness` | `30%` | Brightness while dimmed (`100%` disables dimming) |
 
 ### ⚡ Step 4: Compile and Flash Firmware
 
@@ -203,7 +238,8 @@ After successful startup, the display shows a loading screen followed by the mai
 
 ### 💡 Additional Features
 
-- **🌟 Backlight Control**: Automatically turns off during OTA updates
+- **🌟 Backlight Control**: Automatically turns off during OTA updates, dims after inactivity
+- **📶 Fallback Hotspot**: If WiFi is unreachable, the device opens the hotspot `Energy-Dashboard Fallback`
 - **🏠 Home Assistant Integration**: Control backlight via Home Assistant
 - **🔄 Real-time Updates**: Data refreshes automatically from your sensors
 
@@ -216,8 +252,10 @@ The configuration is modular for easy customization:
 | 📄 [main.yml](main.yml) | Main configuration file |
 | 🔧 [base/hardware.yml](base/hardware.yml) | Hardware-specific settings (display, I2C, SPI) |
 | 🌐 [base/network.yml](base/network.yml) | WiFi, API, OTA configuration |
+| 💡 [base/backlight.yml](base/backlight.yml) | Backlight and auto-dimming |
 | 📊 [sensors/homeassistant.yml](sensors/homeassistant.yml) | Home Assistant sensor imports |
 | 🎨 [ui/*.yml](ui/) | UI components (fonts, layout, animations, pages) |
+| 🔗 [ui/bindings.yml](ui/bindings.yml) | Which sensor updates which label |
 
 ### 📂 File Structure
 
@@ -225,20 +263,24 @@ The configuration is modular for easy customization:
 .
 ├── main.yml                    # Main ESPHome configuration
 ├── secrets.yaml                # Your credentials (not in git)
+├── secrets.example.yaml        # Template for secrets.yaml
 ├── docker-compose.yml          # Docker setup
 ├── base/
 │   ├── hardware.yml            # Display & hardware config
-│   └── network.yml             # Network settings
+│   ├── network.yml             # Network settings
+│   └── backlight.yml           # Backlight & auto-dimming
 ├── sensors/
-│   └── homeassistant.yml       # HA sensor definitions
+│   └── homeassistant.yml       # HA sensor definitions (entity IDs)
 ├── ui/
-│   ├── animations.yml          # UI animations
+│   ├── animations.yml          # Energy flow animations
+│   ├── bindings.yml            # Sensor -> label updates, clock, home ring
+│   ├── dashboard.h             # C++ helpers for animations
 │   ├── fonts.yml               # Font definitions
 │   ├── layout.yml              # Layout configuration
-│   ├── loading.yml             # Loading screen
+│   ├── loading.yml             # Loading screen & connection status
 │   ├── page_dashboard.yml      # Main dashboard page
 │   ├── page_power_table.yml    # Power table page
-│   └── power_table_updates.yml # Power table updates
+│   └── widgets/                # Reusable widget templates
 ├── fonts/                      # Font files
 └── docs/                       # Documentation & screenshots
 ```

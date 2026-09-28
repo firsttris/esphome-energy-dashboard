@@ -2,8 +2,17 @@
 
 esp32:
   variant: esp32s3
+  flash_size: 16MB
   framework:
     type: esp-idf
+    advanced:
+      # Code & Konstanten aus dem PSRAM ausführen: entlastet den Flash-Bus,
+      # den sich das RGB-Panel sonst mit der CPU teilt (weniger Flackern)
+      execute_from_psram: true
+    sdkconfig_options:
+      # Größerer Daten-Cache beschleunigt das Rendern aus dem PSRAM-Framebuffer
+      CONFIG_ESP32S3_DATA_CACHE_64KB: y
+      CONFIG_ESP32S3_DATA_CACHE_LINE_64B: y
 
 psram:
   mode: octal
@@ -30,7 +39,6 @@ display:
     dimensions:
       width: 480
       height: 480
-    rotation: 270
     spi_mode: MODE3
     data_rate: 2MHz
     color_order: RGB
@@ -67,16 +75,13 @@ touchscreen:
     i2c_id: touchscreen_bus
     on_touch:
       then:
+        # Gedimmtes Display: erster Touch weckt nur auf, ohne Seitenwechsel
         - if:
             condition:
-              lvgl.page.is_showing: page_dashboard
+              lambda: 'return id(display_dimmed);'
             then:
-              - lvgl.page.show:
-                  id: page_power_table
-                  animation: move_left
-                  time: 300ms
+              - script.execute: wake_display
             else:
-              - lvgl.page.show:
-                  id: page_dashboard
-                  animation: move_right
+              - lvgl.page.next:
+                  animation: move_left
                   time: 300ms

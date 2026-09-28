@@ -1,0 +1,10 @@
+# Animiertes Energiefluss-Segment (Position/Größe setzt ui/animations.yml)
+# Variablen: flow_id, color
+obj:
+  id: ${flow_id}
+  width: 4
+  height: 15
+  bg_color: ${color}
+  radius: 2
+  border_width: 0
+  hidden: true

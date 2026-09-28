@@ -3,16 +3,27 @@
 lvgl:
   log_level: NONE
   color_depth: 16
-  
+  rotation: 270
+
   displays:
     - tft_display
-  
+
   touchscreens:
     - tft_touch
-  
+
   # Loading Overlay (Top Layer)
   top_layer:
     widgets:
+      # Offline-Hinweis (oben links), sichtbar solange HA nicht verbunden ist
+      - label:
+          id: offline_indicator
+          x: 6
+          y: 6
+          text: "\U000F0164"
+          text_font: icons_16
+          text_color: 0xFF5252
+          hidden: true
+
       - obj:
           id: loading_overlay
           width: 480
@@ -28,7 +39,7 @@ lvgl:
                 text: "\U000F0A72"
                 text_font: icons_32
                 text_color: 0xFFBB33
-            
+
             # App Name
             - label:
                 align: CENTER
@@ -36,7 +47,7 @@ lvgl:
                 text: "Energie Dashboard"
                 text_font: roboto_16
                 text_color: 0xFFFFFF
-            
+
             # Status Text
             - label:
                 id: loading_status
@@ -45,7 +56,7 @@ lvgl:
                 text: "Verbinde..."
                 text_font: roboto_14
                 text_color: 0x888888
-            
+
             # Spinner
             - spinner:
                 id: loading_spinner
@@ -60,7 +71,7 @@ lvgl:
                 indicator:
                   arc_color: 0x00BBFF
                   arc_width: 4
-            
+
             # Progress Bar
             - bar:
                 id: loading_bar
@@ -77,15 +88,21 @@ lvgl:
                 indicator:
                   bg_color: 0x00FF99
                   radius: 4
-  
-  # Pages mit Swipe-Funktion
+
+  # Seiten - Wechsel per Tap (siehe base/hardware.yml)
   pages:
     - !include page_dashboard.yml
     - !include page_power_table.yml
-  
-  # Swipe zwischen den Seiten aktivieren
+
+  # Nach der letzten Seite wieder bei der ersten beginnen
   page_wrap: true
-  
+
   # Dashboard beim Start laden
   on_ready:
     - lvgl.page.show: page_dashboard
+
+  # Display nach Inaktivität dimmen (Aufwecken per Touch)
+  on_idle:
+    timeout: ${idle_timeout}
+    then:
+      - script.execute: dim_display

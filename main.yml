@@ -1,16 +1,29 @@
 # Energie Dashboard - Hauptkonfiguration
 # Modulare Struktur für bessere Wartbarkeit
 
+substitutions:
+  # Ab welcher Leistung (W) ein Energiefluss animiert wird
+  flow_threshold_w: "20"
+  # Leistung (W), bei der die Fluss-Animation ihre Höchstgeschwindigkeit erreicht
+  flow_full_speed_w: "5000"
+  # Nach dieser Zeit ohne Touch wird das Display gedimmt
+  idle_timeout: 5min
+  # Helligkeit im gedimmten Zustand (100% = Dimmen deaktiviert)
+  idle_brightness: 30%
+
 esphome:
   name: "energy-dashboard"
   friendly_name: "Energie Dashboard"
+  includes:
+    - ui/dashboard.h
 
 packages:
   hardware: !include base/hardware.yml
   network: !include base/network.yml
+  backlight: !include base/backlight.yml
   ha_sensors: !include sensors/homeassistant.yml
   ui_fonts: !include ui/fonts.yml
   ui_loading: !include ui/loading.yml
   ui_layout: !include ui/layout.yml
+  ui_bindings: !include ui/bindings.yml
   ui_animations: !include ui/animations.yml
-  ui_power_table: !include ui/power_table_updates.yml
