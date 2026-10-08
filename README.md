@@ -298,8 +298,9 @@ The configuration is modular for easy customization:
 
 <div align="center">
 
-**Made by the open source community**
+⭐ Like the ESPHome Energy Dashboard? A [star on GitHub](https://github.com/firsttris/esphome-energy-dashboard) helps others find it.<br>
+🐛 [Report a bug](https://github.com/firsttris/esphome-energy-dashboard/issues/new) · 💡 [Request a feature](https://github.com/firsttris/esphome-energy-dashboard/issues/new)
 
-⭐ Star us on [GitHub](https://github.com/firsttris/esphome-energy-dashboard) • 🐛 [Report a Bug](https://github.com/firsttris/esphome-energy-dashboard/issues) • 💡 [Request a Feature](https://github.com/firsttris/esphome-energy-dashboard/issues)
+<sub>License: <a href="LICENSE">MIT</a> · © Tristan Teufel and contributors</sub>
 
 </div>
