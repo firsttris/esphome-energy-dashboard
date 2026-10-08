@@ -1,10 +1,19 @@
 name: Build firmware
 
+# Changes to documentation alone don't build.
 on:
   push:
     branches: [main]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - "LICENSE"
   pull_request:
     types: [opened, synchronize, reopened, ready_for_review]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - "LICENSE"
 
 # A new push to a pull request cancels its outdated run; runs on main finish
 concurrency:
