@@ -51,8 +51,9 @@ struct Flow {
     return total;
   }
 
-  // Bewegt das Segment um `speed` Pixel weiter; speed <= 0 blendet es aus
-  void step(float speed) {
+  // Bewegt das Segment um `speed` Pixel weiter; speed <= 0 blendet es aus.
+  // reverse = true läuft den Linienzug vom Ziel zum Start.
+  void step(float speed, bool reverse = false) {
     if (speed <= 0) {
       set_visible(obj, false);
       return;
@@ -63,7 +64,7 @@ struct Flow {
       pos -= len;
 
     // Aktuellen Abschnitt und Position darauf bestimmen
-    float remaining = pos;
+    float remaining = reverse ? len - pos : pos;
     for (uint8_t i = 1; i < n; i++) {
       int dx = pts[i][0] - pts[i - 1][0];
       int dy = pts[i][1] - pts[i - 1][1];
@@ -100,6 +101,43 @@ inline float flow_speed(float watts, float threshold, float full_speed) {
     return 0;
   float ratio = std::min(watts / full_speed, 1.0f);
   return 1.0f + ratio * 4.0f;
+}
+
+// Aufteilung der aktuellen Leistung (W) auf die einzelnen Flüsse
+struct FlowSplit {
+  float pv_home, pv_battery, pv_grid;
+  float battery_home, battery_grid;
+  float grid_home, grid_battery;
+};
+
+// Verteilt die Leistung wie ein Wechselrichter: PV versorgt zuerst das Haus,
+// dann die Batterie, der Rest geht ins Netz. Die Batterie versorgt zuerst das
+// Haus, den Rest speist sie ein. Das Netz deckt den restlichen Hausverbrauch
+// und lädt danach die Batterie. Der Hausverbrauch ergibt sich aus der
+// Energiebilanz, damit Zu- und Abflüsse immer zusammenpassen.
+// grid: + Bezug / - Einspeisung, battery: + Entladen / - Laden
+inline FlowSplit split_flows(float solar, float grid, float battery) {
+  solar = std::max(solar, 0.0f);
+  float grid_import = std::max(grid, 0.0f);
+  float feed_in = std::max(-grid, 0.0f);
+  float discharge = std::max(battery, 0.0f);
+  float charge = std::max(-battery, 0.0f);
+  float home = std::max(solar + grid_import + discharge - feed_in - charge, 0.0f);
+
+  FlowSplit f{};
+  f.pv_home = std::min(solar, home);
+  float pv_rest = solar - f.pv_home;
+  f.pv_battery = std::min(pv_rest, charge);
+  f.pv_grid = std::min(pv_rest - f.pv_battery, feed_in);
+
+  float home_rest = home - f.pv_home;
+  f.battery_home = std::min(discharge, home_rest);
+  f.battery_grid = std::min(discharge - f.battery_home, std::max(feed_in - f.pv_grid, 0.0f));
+  home_rest -= f.battery_home;
+
+  f.grid_home = std::min(grid_import, home_rest);
+  f.grid_battery = std::min(grid_import - f.grid_home, std::max(charge - f.pv_battery, 0.0f));
+  return f;
 }
 
 // Erkennt, ob ein Tageszähler (z. B. Gas, Wasser) kürzlich gestiegen ist

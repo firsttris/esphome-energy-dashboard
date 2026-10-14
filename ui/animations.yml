@@ -40,22 +40,24 @@ interval:
                 float battery = online ? value_or_zero(id(current_battery_power)) : 0;   // + Entladen / - Laden
                 float heating = online ? value_or_zero(id(current_heating_rod_power)) : 0;
 
-                float grid_import = std::max(grid, 0.0f);
-                float feed_in = std::max(-grid, 0.0f);
-                float discharge = std::max(battery, 0.0f);
-                float charge = std::max(-battery, 0.0f);
+                auto f = dashboard::split_flows(solar, grid, battery);
 
-                // Batterie wird aus PV geladen, soweit PV reicht - der Rest kommt aus dem Netz
-                float pv_to_battery = std::min(charge, solar);
-                float grid_to_battery = std::min(charge - pv_to_battery, grid_import);
-                float pv_to_home = solar - feed_in - pv_to_battery;
+                pv_home.step(speed(f.pv_home));
+                grid_home.step(speed(f.grid_home));
+                battery_home.step(speed(f.battery_home));
+                pv_grid.step(speed(f.pv_grid));
+                pv_battery.step(speed(f.pv_battery));
 
-                pv_home.step(speed(pv_to_home));
-                grid_home.step(speed(grid_import - grid_to_battery));
-                battery_home.step(speed(discharge));
-                pv_grid.step(speed(feed_in));
-                pv_battery.step(speed(pv_to_battery));
-                grid_battery.step(speed(grid_to_battery));
+                // Netz <-> Batterie teilen sich eine Leitung: weiß = Laden aus dem Netz,
+                // pink und rückwärts = Einspeisung aus der Batterie
+                static bool battery_export = false;
+                bool exporting = f.battery_grid > f.grid_battery;
+                if (exporting != battery_export) {
+                  battery_export = exporting;
+                  lv_obj_set_style_bg_color(id(flow_grid_battery),
+                      lv_color_hex(exporting ? 0xFF3399 : 0xFFFFFF), 0);
+                }
+                grid_battery.step(speed(exporting ? f.battery_grid : f.grid_battery), exporting);
                 home_heating.step(speed(heating));
                 gas_home.step(online && dashboard::gas_activity.active() ? 1.0f : 0.0f);
                 water_home.step(online && dashboard::water_activity.active() ? 1.0f : 0.0f);
