@@ -4,7 +4,7 @@
 
 **Visualize Your Home's Energy Flow in Real-Time!**
 
-<img src="docs/screenshot.jpg" width="500" alt="Energy Dashboard Screenshot">
+<img src="docs/hero.svg" width="100%" alt="Energy Dashboard: energy flow page and current power table">
 
 [![ESPHome](https://img.shields.io/badge/ESPHome-Compatible-blue?logo=esphome)](https://esphome.io/)
 [![Home Assistant](https://img.shields.io/badge/Home%20Assistant-Integration-41BDF5?logo=homeassistant)](https://www.home-assistant.io/)
@@ -100,9 +100,25 @@ Ensure that the entity IDs in [sensors/homeassistant.yml](sensors/homeassistant.
 
 > **⚠️ Sign conventions:** If your inverter reports grid or battery power the other way round, add a `multiply: -1` filter to that sensor.
 
+> **🔀 How the flows are split:** The animations are calculated from PV, grid and battery power alone. Home consumption is derived from the energy balance, `current_home_consumption` only feeds the power table. Power is split the way an inverter prioritizes it: PV supplies the home first, then the battery, and the rest is fed into the grid. The battery supplies the home first and feeds any surplus into the grid. The grid covers the rest of the home consumption and then charges the battery. The grid ↔ battery line shows both directions: white when the grid charges the battery, pink and reversed when the battery feeds into the grid.
+
 > **✅ Note**: The dashboard works even if some sensors don't exist – the loading screen waits at most 10 s for missing sensors.
 
-> **📊 Important**: The dashboard requires sensors that accumulate **daily consumption values**, similar to Home Assistant's energy distribution feature. While Home Assistant typically uses total meters, here daily meters are needed. Since the daily accumulated values from the energy dashboard are not accessible, I created utility meters in Home Assistant for daily consumption.
+#### 📊 No daily sensors yet? Create utility meters
+
+The dashboard shows **today's** values, but most meters and inverters only report a running total. Home Assistant's Energy Dashboard does not expose its daily values to other integrations, so add a [utility meter](https://www.home-assistant.io/integrations/utility_meter/) for each total that resets every day. Add it to `configuration.yaml`, or under *Settings → Devices & Services → Helpers → Utility Meter* (meter reset cycle: daily):
+
+```yaml
+utility_meter:
+  strom_tagesverbrauch:
+    source: sensor.stromzaehler_total      # your total meter (kWh)
+    cycle: daily
+  gas_tagesverbrauch:
+    source: sensor.gaszaehler_total        # your gas meter (m³)
+    cycle: daily
+```
+
+This creates `sensor.strom_tagesverbrauch` and `sensor.gas_tagesverbrauch`, which you then enter in [sensors/homeassistant.yml](sensors/homeassistant.yml). Many inverters (e.g. Deye) already provide daily values for PV, grid and battery.
 
 ### 🎛️ Optional: Tweak Behaviour
 
@@ -212,17 +228,34 @@ esphome dashboard .
 ```
 Then open **http://localhost:6052** in your browser and use the web interface.
 
-**Hosted Dashboard** (no installation needed):
-> **🎉 No installation needed!** Flash directly from your browser.
+**Browser flashing** (no USB drivers or ESPHome needed on the flashing computer):
 
-1. Visit **https://web.esphome.io/**
-2. Click "Connect" and select your ESP32-S3 device
-3. Upload your `main.yml` configuration file
-4. Click "Install" to compile and flash
+[ESPHome Web](https://web.esphome.io/) flashes a finished firmware file, it cannot compile `main.yml` itself.
 
-**Perfect for:** Users who prefer GUI over command line, or quick flashing without local ESPHome installation.
+1. Compile once: `esphome compile main.yml` (or in the dashboard: *Install → Manual download → Factory format*)
+2. Visit **https://web.esphome.io/** in Chrome or Edge
+3. Click "Connect" and select your ESP32-S3
+4. Click "Install" and choose `.esphome/build/energy-dashboard/build/firmware.factory.bin`
+
 
 </details>
+
+### 🏠 Step 5: Add to Home Assistant
+
+After the first boot the device connects to your WiFi. Home Assistant usually discovers it automatically under *Settings → Devices & Services*. When asked for the encryption key, enter the `api_key` from your `secrets.yaml`. The dashboard loads its data as soon as Home Assistant is connected.
+
+### 🔄 Step 6: Updates over WiFi
+
+The USB cable is only needed for the first flash. After that, updates are installed over WiFi (OTA):
+
+```bash
+git pull
+esphome run main.yml --device=energy-dashboard.local
+```
+
+> **💡 Tip:** If `energy-dashboard.local` cannot be resolved, use the device's IP address instead (shown in your router or in Home Assistant). The backlight turns off while the update is installed.
+
+---
 
 ## 📱 Usage
 
@@ -236,6 +269,18 @@ After successful startup, the display shows a loading screen followed by the mai
 |------|-------------|
 | **📊 Dashboard** | Overview with energy flow diagrams and current values |
 | **📋 Power Table** | Detailed table showing the current load |
+
+When the display is dimmed, the first tap only wakes it up; the next tap switches the page.
+
+### 🧭 Reading the Dashboard
+
+| Element | Meaning |
+|---------|---------|
+| **Circles** | Today's totals: PV, grid import (→) / feed-in (←), battery charged (↓) / discharged (↑), home, heating rod, gas and water |
+| **Moving segments** | Current power flow; the faster, the more power. No segment = less than `flow_threshold_w` |
+| **Ring around the home** | Where today's consumption came from: PV (yellow), battery (pink), grid (blue) |
+| **Battery arc** | State of charge |
+| **Red cloud (top left)** | Home Assistant is not connected, values may be outdated |
 
 ### 💡 Additional Features
 
