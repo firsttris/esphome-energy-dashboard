@@ -26,7 +26,6 @@ A modular ESPHome project that visualizes daily energy distribution similar to H
   - Page 1: Daily accumulated energy consumption (Home Assistant style)
   - Page 2: Current load table with detailed breakdown
 - **👆 Touch Interface**: Simply tap the screen to switch between views
-- **🌙 Auto-Dimming**: Backlight dims after inactivity, a tap wakes it up
 - **📡 Offline Indicator**: A small cloud icon shows when Home Assistant is disconnected
 - **🎨 Modular Design**: Easy to customize and extend
 
@@ -128,8 +127,6 @@ The `substitutions` at the top of [main.yml](main.yml) control the behaviour:
 |--------------|---------|-------------|
 | `flow_threshold_w` | `20` | Minimum power (W) before a flow is animated |
 | `flow_full_speed_w` | `5000` | Power (W) at which the animation reaches full speed |
-| `idle_timeout` | `5min` | Time without touch before the display dims |
-| `idle_brightness` | `30%` | Brightness while dimmed (`100%` disables dimming) |
 
 ### ⚡ Step 4: Compile and Flash Firmware
 
@@ -270,8 +267,6 @@ After successful startup, the display shows a loading screen followed by the mai
 | **📊 Dashboard** | Overview with energy flow diagrams and current values |
 | **📋 Power Table** | Detailed table showing the current load |
 
-When the display is dimmed, the first tap only wakes it up; the next tap switches the page.
-
 ### 🧭 Reading the Dashboard
 
 | Element | Meaning |
@@ -284,7 +279,7 @@ When the display is dimmed, the first tap only wakes it up; the next tap switche
 
 ### 💡 Additional Features
 
-- **🌟 Backlight Control**: Automatically turns off during OTA updates, dims after inactivity
+- **🌟 Backlight Control**: Automatically turns off during OTA updates
 - **📶 Fallback Hotspot**: If WiFi is unreachable, the device opens the hotspot `Energy-Dashboard Fallback`
 - **🏠 Home Assistant Integration**: Control backlight via Home Assistant
 - **🔄 Real-time Updates**: Data refreshes automatically from your sensors
@@ -298,7 +293,7 @@ The configuration is modular for easy customization:
 | 📄 [main.yml](main.yml) | Main configuration file |
 | 🔧 [base/hardware.yml](base/hardware.yml) | Hardware-specific settings (display, I2C, SPI) |
 | 🌐 [base/network.yml](base/network.yml) | WiFi, API, OTA configuration |
-| 💡 [base/backlight.yml](base/backlight.yml) | Backlight and auto-dimming |
+| 💡 [base/backlight.yml](base/backlight.yml) | Backlight |
 | 📊 [sensors/homeassistant.yml](sensors/homeassistant.yml) | Home Assistant sensor imports |
 | 🎨 [ui/*.yml](ui/) | UI components (fonts, layout, animations, pages) |
 | 🔗 [ui/bindings.yml](ui/bindings.yml) | Which sensor updates which label |
@@ -314,7 +309,7 @@ The configuration is modular for easy customization:
 ├── base/
 │   ├── hardware.yml            # Display & hardware config
 │   ├── network.yml             # Network settings
-│   └── backlight.yml           # Backlight & auto-dimming
+│   └── backlight.yml           # Backlight
 ├── sensors/
 │   └── homeassistant.yml       # HA sensor definitions (entity IDs)
 ├── ui/

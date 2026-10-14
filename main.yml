@@ -6,10 +6,6 @@ substitutions:
   flow_threshold_w: "20"
   # Leistung (W), bei der die Fluss-Animation ihre Höchstgeschwindigkeit erreicht
   flow_full_speed_w: "5000"
-  # Nach dieser Zeit ohne Touch wird das Display gedimmt
-  idle_timeout: 5min
-  # Helligkeit im gedimmten Zustand (100% = Dimmen deaktiviert)
-  idle_brightness: 30%
 
 esphome:
   name: "energy-dashboard"

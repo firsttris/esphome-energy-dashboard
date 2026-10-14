@@ -75,13 +75,6 @@ touchscreen:
     i2c_id: touchscreen_bus
     on_touch:
       then:
-        # Gedimmtes Display: erster Touch weckt nur auf, ohne Seitenwechsel
-        - if:
-            condition:
-              lambda: 'return id(display_dimmed);'
-            then:
-              - script.execute: wake_display
-            else:
-              - lvgl.page.next:
-                  animation: move_left
-                  time: 300ms
+        - lvgl.page.next:
+            animation: move_left
+            time: 300ms

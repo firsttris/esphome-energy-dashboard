@@ -100,9 +100,3 @@ lvgl:
   # Dashboard beim Start laden
   on_ready:
     - lvgl.page.show: page_dashboard
-
-  # Display nach Inaktivität dimmen (Aufwecken per Touch)
-  on_idle:
-    timeout: ${idle_timeout}
-    then:
-      - script.execute: dim_display
