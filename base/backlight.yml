@@ -32,7 +32,12 @@ script:
     then:
       - if:
           condition:
-            lambda: 'return !id(display_dimmed) && id(display_backlight).remote_values.is_on();'
+            # Nur dimmen, wenn es dunkler wird (bei idle_brightness 100% also nie,
+            # sonst würde der nächste Tipp nur "aufwecken" statt die Seite zu wechseln)
+            lambda: |-
+              auto &light = id(display_backlight).remote_values;
+              return !id(display_dimmed) && light.is_on() &&
+                     light.get_brightness() > strtof("${idle_brightness}", nullptr) / 100.0f + 0.001f;
           then:
             - lambda: |-
                 id(brightness_before_dim) = id(display_backlight).remote_values.get_brightness();

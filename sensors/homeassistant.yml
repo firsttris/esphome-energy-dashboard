@@ -58,7 +58,7 @@ sensor:
   # Aktuelle Leistungswerte (W) - steuern die Fluss-Animationen
   - platform: homeassistant
     id: current_home_consumption
-    entity_id: sensor.hauverbrauch
+    entity_id: sensor.hausverbrauch
     internal: true
 
   - platform: homeassistant

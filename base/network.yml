@@ -17,6 +17,9 @@ captive_portal:
 api:
   encryption:
     key: !secret api_key
+  # Ohne Home Assistant nicht neu starten, sondern die letzten Werte
+  # mit Offline-Hinweis weiter anzeigen (Standard wäre Neustart nach 15 min)
+  reboot_timeout: 0s
   on_client_connected:
     - if:
         condition:
@@ -37,3 +40,8 @@ ota:
           id: display_backlight
           transition_length: 0s
       - lambda: "id(display_backlight).loop();"
+    # Abgebrochenes Update: Display wieder einschalten
+    on_error:
+      - light.turn_on:
+          id: display_backlight
+          transition_length: 0s

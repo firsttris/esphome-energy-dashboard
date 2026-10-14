@@ -100,7 +100,7 @@ Ensure that the entity IDs in [sensors/homeassistant.yml](sensors/homeassistant.
 
 > **⚠️ Sign conventions:** If your inverter reports grid or battery power the other way round, add a `multiply: -1` filter to that sensor.
 
-> **🔀 How the flows are split:** The animations are calculated from PV, grid and battery power alone. Home consumption is derived from the energy balance, `current_home_consumption` only feeds the power table. Power is split the way an inverter prioritizes it: PV supplies the home first, then the battery, and the rest is fed into the grid. The battery supplies the home first and feeds any surplus into the grid. The grid covers the rest of the home consumption and then charges the battery. The grid ↔ battery line shows both directions: white when the grid charges the battery, pink and reversed when the battery feeds into the grid.
+> **🔀 How the flows are split:** The animations use PV, grid, battery and home power (`current_home_consumption`). If the home sensor has no value, home consumption is derived from the energy balance. Power is split the way an inverter prioritizes it: PV supplies the home first, then the battery, and the rest is fed into the grid. The battery supplies the home first and feeds any surplus into the grid. The grid covers the rest of the home consumption and then charges the battery. The grid ↔ battery line shows both directions: white when the grid charges the battery, pink and reversed when the battery feeds into the grid.
 
 > **✅ Note**: The dashboard works even if some sensors don't exist – the loading screen waits at most 10 s for missing sensors.
 

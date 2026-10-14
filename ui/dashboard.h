@@ -59,6 +59,9 @@ struct Flow {
       return;
     }
     int len = length();
+    // Kurze Leitungen (z. B. Heizstab) nicht durchrasen lassen:
+    // ein Durchlauf dauert mindestens 36 Frames (~1,4 s bei 40 ms)
+    speed = std::min(speed, len / 36.0f);
     pos += speed;
     if (pos >= len)
       pos -= len;
@@ -113,16 +116,20 @@ struct FlowSplit {
 // Verteilt die Leistung wie ein Wechselrichter: PV versorgt zuerst das Haus,
 // dann die Batterie, der Rest geht ins Netz. Die Batterie versorgt zuerst das
 // Haus, den Rest speist sie ein. Das Netz deckt den restlichen Hausverbrauch
-// und lädt danach die Batterie. Der Hausverbrauch ergibt sich aus der
-// Energiebilanz, damit Zu- und Abflüsse immer zusammenpassen.
+// und lädt danach die Batterie.
+// Der Hausverbrauch kommt vom Sensor; die Sensoren gehen selten exakt auf, aus
+// der Bilanz geschätzt fiele das Haus sonst schnell auf 0. Nur ohne gültigen
+// Sensorwert (NAN) wird er aus der Bilanz berechnet.
 // grid: + Bezug / - Einspeisung, battery: + Entladen / - Laden
-inline FlowSplit split_flows(float solar, float grid, float battery) {
+inline FlowSplit split_flows(float solar, float grid, float battery, float home = NAN) {
   solar = std::max(solar, 0.0f);
   float grid_import = std::max(grid, 0.0f);
   float feed_in = std::max(-grid, 0.0f);
   float discharge = std::max(battery, 0.0f);
   float charge = std::max(-battery, 0.0f);
-  float home = std::max(solar + grid_import + discharge - feed_in - charge, 0.0f);
+  if (std::isnan(home))
+    home = solar + grid_import + discharge - feed_in - charge;
+  home = std::max(home, 0.0f);
 
   FlowSplit f{};
   f.pv_home = std::min(solar, home);

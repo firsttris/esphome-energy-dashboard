@@ -40,7 +40,9 @@ interval:
                 float battery = online ? value_or_zero(id(current_battery_power)) : 0;   // + Entladen / - Laden
                 float heating = online ? value_or_zero(id(current_heating_rod_power)) : 0;
 
-                auto f = dashboard::split_flows(solar, grid, battery);
+                auto *home_sensor = id(current_home_consumption);
+                float home = online && home_sensor->has_state() ? home_sensor->state : NAN;
+                auto f = dashboard::split_flows(solar, grid, battery, home);
 
                 pv_home.step(speed(f.pv_home));
                 grid_home.step(speed(f.grid_home));
