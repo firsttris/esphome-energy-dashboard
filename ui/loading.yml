@@ -15,16 +15,17 @@ script:
     then:
       - lambda: |-
           id(ha_connected) = true;
+          dash::in.online = true;
           id(loading_started_ms) = millis();
           lv_label_set_text(id(loading_status), "Verbunden - lade Daten...");
-          lv_obj_set_style_text_color(id(loading_status), lv_color_hex(0x00FF99), 0);
+          lv_obj_set_style_text_color(id(loading_status), lv_color_hex(0x2EE6A6), 0);
       - lvgl.widget.hide: offline_indicator
 
   - id: on_ha_disconnected
     then:
-      - globals.set:
-          id: ha_connected
-          value: 'false'
+      - lambda: |-
+          id(ha_connected) = false;
+          dash::in.online = false;
       - lvgl.widget.show: offline_indicator
 
 interval:
@@ -42,7 +43,8 @@ interval:
                   id(battery_soc), id(battery_charge), id(battery_discharge),
                   id(gas_power), id(water_power), id(heating_rod_daily_energy),
                   id(current_home_consumption), id(current_grid_power), id(current_solar_power),
-                  id(current_pv_surplus), id(current_heating_rod_power), id(current_battery_power),
+                  id(current_heating_rod_power), id(current_battery_power),
+                  id(boiler_temperature), id(pv_forecast_today),
                 };
                 const int total = sizeof(sensors) / sizeof(sensors[0]);
                 int received = 0;
@@ -58,6 +60,6 @@ interval:
 
                 bool timed_out = millis() - id(loading_started_ms) > 10000;
                 if (received == total || timed_out) {
-                  lv_obj_add_flag(id(loading_spinner), LV_OBJ_FLAG_HIDDEN);
                   lv_obj_add_flag(id(loading_overlay), LV_OBJ_FLAG_HIDDEN);
+                  dash::start_boot();
                 }

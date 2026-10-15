@@ -1,36 +1,49 @@
-# Font Definitionen
+# Schriften: Barlow Semi Condensed (schmal, gut lesbare Ziffern) und MDI-Symbole
 
 font:
-  - file: "gfonts://Roboto"
-    id: roboto_12
-    size: 12
-    glyphs: &latin_glyphs " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~°²³ÄÖÜäöüß"
+  - file: { type: gfonts, family: Barlow Semi Condensed, weight: 600 }
+    id: font_32b
+    size: 32
+    glyphs: &digits " +,-.0123456789:%WkM−"
 
-  - file: "gfonts://Roboto"
-    id: roboto_14
-    size: 14
-    glyphs: *latin_glyphs
-
-  - file: "gfonts://Roboto"
-    id: roboto_16
-    size: 16
-    glyphs: *latin_glyphs
-
-  - file: "gfonts://Roboto"
-    id: roboto_24
+  - file: { type: gfonts, family: Barlow Semi Condensed, weight: 700 }
+    id: font_24b
     size: 24
-    glyphs: *latin_glyphs
+    glyphs: &latin " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~°²³ÄÖÜäöüß€·–−"
+
+  - file: { type: gfonts, family: Barlow Semi Condensed, weight: 600 }
+    id: font_20b
+    size: 20
+    glyphs: *latin
+
+  - file: { type: gfonts, family: Barlow Semi Condensed, weight: 500 }
+    id: font_14
+    size: 14
+    glyphs: *latin
+
+  - file: { type: gfonts, family: Barlow Semi Condensed, weight: 500 }
+    id: font_12
+    size: 12
+    glyphs: *latin
+
+  - file: { type: gfonts, family: Barlow Semi Condensed, weight: 600 }
+    id: font_10b
+    size: 10
+    glyphs: *latin
 
   - file: "fonts/materialdesignicons-webfont.ttf"
     id: icons_32
     size: 32
     glyphs: [
-      "\U000F0A72",  # solar-power
-      "\U000F02DC",  # home
-      "\U000F12A3",  # battery-high
+      "\U000F0A72",  # solar-power (Ladebildschirm)
+    ]
+
+  - file: "fonts/materialdesignicons-webfont.ttf"
+    id: icons_20
+    size: 20
+    glyphs: [
       "\U000F0238",  # fire (Gas)
       "\U000F058C",  # water
-      "\U000F0F92",  # water-boiler (Heizstab)
       "\U000F0D3E",  # transmission-tower (Netz)
     ]
 
@@ -38,9 +51,7 @@ font:
     id: icons_16
     size: 16
     glyphs: [
-      "\U000F0045",  # arrow-down
-      "\U000F005D",  # arrow-up
-      "\U000F0054",  # arrow-right
-      "\U000F004D",  # arrow-left
+      "\U000F0045",  # arrow-down (Bezug)
+      "\U000F005D",  # arrow-up (Einspeisung)
       "\U000F0164",  # cloud-off-outline (Offline-Hinweis)
     ]

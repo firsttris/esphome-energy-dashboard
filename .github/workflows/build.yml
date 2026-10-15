@@ -80,7 +80,7 @@ jobs:
         uses: actions/cache@v4
         with:
           path: .esphome
-          key: esphome-build-${{ runner.os }}-py${{ steps.python.outputs.python-version }}-${{ steps.esphome.outputs.version }}-${{ hashFiles('**/*.yml', '**/*.h', 'fonts/**', '!.github/**', '!.esphome/**') }}
+          key: esphome-build-${{ runner.os }}-py${{ steps.python.outputs.python-version }}-${{ steps.esphome.outputs.version }}-${{ hashFiles('**/*.yml', '**/*.h', 'fonts/**', 'images/**', '!.github/**', '!.esphome/**') }}
           restore-keys: esphome-build-${{ runner.os }}-py${{ steps.python.outputs.python-version }}-${{ steps.esphome.outputs.version }}-
 
       - name: Compile

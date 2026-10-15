@@ -1,9 +1,8 @@
-# LVGL UI Layout
+# LVGL: zwei leere Seiten, deren Inhalt ui/scene.h aufbaut, plus Ladebildschirm
 
 lvgl:
   log_level: NONE
   color_depth: 16
-  rotation: 270
 
   displays:
     - tft_display
@@ -11,14 +10,13 @@ lvgl:
   touchscreens:
     - tft_touch
 
-  # Loading Overlay (Top Layer)
   top_layer:
     widgets:
-      # Offline-Hinweis (oben links), sichtbar solange HA nicht verbunden ist
+      # Offline-Hinweis (oben Mitte), sichtbar solange HA nicht verbunden ist
       - label:
           id: offline_indicator
-          x: 6
-          y: 6
+          align: TOP_MID
+          y: 8
           text: "\U000F0164"
           text_font: icons_16
           text_color: 0xFF5252
@@ -28,75 +26,101 @@ lvgl:
           id: loading_overlay
           width: 480
           height: 480
-          bg_color: 0x0a0a0a
+          bg_color: 0x0B0D10
           border_width: 0
           radius: 0
           widgets:
-            # Energy Icon
             - label:
                 align: CENTER
                 y: -80
                 text: "\U000F0A72"
                 text_font: icons_32
-                text_color: 0xFFBB33
-
-            # App Name
+                text_color: 0xFFB627
             - label:
                 align: CENTER
-                y: -30
+                y: -34
                 text: "Energie Dashboard"
-                text_font: roboto_16
-                text_color: 0xFFFFFF
-
-            # Status Text
+                text_font: font_24b
+                text_color: 0xEEF2F5
             - label:
                 id: loading_status
                 align: CENTER
-                y: 20
-                text: "Verbinde..."
-                text_font: roboto_14
-                text_color: 0x888888
-
-            # Spinner
-            - spinner:
-                id: loading_spinner
-                align: CENTER
-                y: 60
-                width: 40
-                height: 40
-                spin_time: 1.5s
-                arc_length: 90deg
-                arc_width: 4
-                arc_color: 0x333333
-                indicator:
-                  arc_color: 0x00BBFF
-                  arc_width: 4
-
-            # Progress Bar
+                y: 10
+                text: "Verbinde ..."
+                text_font: font_14
+                text_color: 0x8693A0
             - bar:
                 id: loading_bar
                 align: CENTER
-                y: 120
-                width: 280
-                height: 8
+                y: 50
+                width: 240
+                height: 6
                 value: 0
                 min_value: 0
                 max_value: 100
-                bg_color: 0x222222
+                bg_color: 0x1C2128
                 border_width: 0
-                radius: 4
+                radius: 3
                 indicator:
-                  bg_color: 0x00FF99
-                  radius: 4
+                  bg_color: 0x2EE6A6
+                  radius: 3
 
-  # Seiten - Wechsel per Tap (siehe base/hardware.yml)
   pages:
-    - !include page_dashboard.yml
-    - !include page_power_table.yml
+    - id: page_dashboard
+      bg_color: 0x0B0D10
+    - id: page_today
+      bg_color: 0x0B0D10
+      # Unsichtbare Platzhalter: schalten die Widget-Typen ein, die ui/scene.h
+      # selbst anlegt (LVGL baut nur Widgets ein, die in der YAML vorkommen)
+      widgets:
+        - arc: { hidden: true }
+        - line: { hidden: true, points: ["0, 0", "1, 1"] }
+        - image: { hidden: true, src: img_sun }
 
   # Nach der letzten Seite wieder bei der ersten beginnen
   page_wrap: true
 
-  # Dashboard beim Start laden
   on_ready:
     - lvgl.page.show: page_dashboard
+
+esphome:
+  on_boot:
+    - priority: -10
+      then:
+        - lambda: |-
+            dash::font = {id(font_32b)->get_lv_font(), id(font_24b)->get_lv_font(), id(font_20b)->get_lv_font(),
+                          id(font_14)->get_lv_font(), id(font_12)->get_lv_font(), id(font_10b)->get_lv_font(),
+                          id(icons_20)->get_lv_font(), id(icons_16)->get_lv_font()};
+            dash::img.dot[dash::D_PV] = id(img_dot_pv)->get_lv_image_dsc();
+            dash::img.dot[dash::D_GRID] = id(img_dot_grid)->get_lv_image_dsc();
+            dash::img.dot[dash::D_EXP] = id(img_dot_exp)->get_lv_image_dsc();
+            dash::img.dot[dash::D_BAT] = id(img_dot_bat)->get_lv_image_dsc();
+            dash::img.dot[dash::D_BOIL] = id(img_dot_boil)->get_lv_image_dsc();
+            dash::img.dot[dash::D_WHITE] = id(img_dot_white)->get_lv_image_dsc();
+            dash::img.sun = id(img_sun)->get_lv_image_dsc();
+            dash::img.moon = id(img_moon)->get_lv_image_dsc();
+            dash::img.home_glow = id(img_home_glow)->get_lv_image_dsc();
+            dash::img.wave_front = id(img_wave_front)->get_lv_image_dsc();
+            dash::img.wave_back = id(img_wave_back)->get_lv_image_dsc();
+            dash::img.bat_mask = id(img_bat_mask)->get_lv_image_dsc();
+            dash::cfg.threshold = ${flow_threshold_w};
+            dash::cfg.full_speed = ${flow_full_speed_w};
+            dash::cfg.capacity_kwh = ${battery_capacity_kwh};
+            dash::cfg.reserve = ${battery_reserve_soc};
+            dash::cfg.price_import = ${price_import};
+            dash::cfg.price_export = ${price_export};
+            dash::cfg.show_fps = ${show_fps};
+            dash::now_fn = []() { return id(ha_time).now(); };
+            dash::build(id(page_dashboard).obj, id(page_today).obj);
+
+interval:
+  # Animationen (~30 Bilder/s), nur wenn die Flussseite sichtbar und das Display an ist
+  - interval: 33ms
+    then:
+      - lambda: |-
+          if (lv_screen_active() == id(page_dashboard).obj && id(display_backlight).current_values.is_on())
+            dash::tick();
+  # Texte, Ringe, Sonne, Hinweis, Tagesverlauf, FPS
+  - interval: 1s
+    then:
+      - lambda: dash::slow_tick();

@@ -1,10 +1,13 @@
-// Hilfsfunktionen für das Energie Dashboard (eingebunden über esphome.includes)
+// Rechenlogik des Energie Dashboards (ohne LVGL): Flussaufteilung, Formatierung,
+// Akku-Prognose, Hinweise. Die Darstellung steckt in ui/scene.h.
 #pragma once
 
 #include <algorithm>
 #include <cmath>
 #include <cstdint>
-#include <lvgl.h>
+#include <cstdio>
+#include <cstring>
+#include <string>
 #include "esphome/core/hal.h"
 #include "esphome/components/sensor/sensor.h"
 
@@ -14,97 +17,7 @@ namespace dashboard {
 inline float value_or_zero(esphome::sensor::Sensor *s) {
   return (s->has_state() && !std::isnan(s->state)) ? s->state : 0.0f;
 }
-
-// Sichtbarkeit nur umschalten, wenn sie sich wirklich ändert (spart Redraws)
-inline void set_visible(lv_obj_t *obj, bool visible) {
-  bool hidden = lv_obj_has_flag(obj, LV_OBJ_FLAG_HIDDEN);
-  if (visible && hidden) {
-    lv_obj_remove_flag(obj, LV_OBJ_FLAG_HIDDEN);
-  } else if (!visible && !hidden) {
-    lv_obj_add_flag(obj, LV_OBJ_FLAG_HIDDEN);
-  }
-}
-
-// Setzt einen Bogen des Haus-Rings (Winkel in Grad, 0 = oben)
-inline void set_arc_segment(lv_obj_t *arc, int start, int end) {
-  if (end <= start) {
-    set_visible(arc, false);
-    return;
-  }
-  set_visible(arc, true);
-  lv_arc_set_angles(arc, start, end);
-}
-
-// Ein animiertes Segment, das entlang eines Linienzugs (max. 3 Punkte) läuft
-struct Flow {
-  lv_obj_t *obj;
-  int16_t pts[3][2];
-  uint8_t n;
-  float pos = 0;
-  int8_t orientation = -1;  // 0 = horizontal, 1 = vertikal, 2 = diagonal
-
-  int length() const {
-    int total = 0;
-    for (uint8_t i = 1; i < n; i++) {
-      total += std::max(std::abs(pts[i][0] - pts[i - 1][0]), std::abs(pts[i][1] - pts[i - 1][1]));
-    }
-    return total;
-  }
-
-  // Bewegt das Segment um `speed` Pixel weiter; speed <= 0 blendet es aus.
-  // reverse = true läuft den Linienzug vom Ziel zum Start.
-  void step(float speed, bool reverse = false) {
-    if (speed <= 0) {
-      set_visible(obj, false);
-      return;
-    }
-    int len = length();
-    // Kurze Leitungen (z. B. Heizstab) nicht durchrasen lassen:
-    // ein Durchlauf dauert mindestens 36 Frames (~1,4 s bei 40 ms)
-    speed = std::min(speed, len / 36.0f);
-    pos += speed;
-    if (pos >= len)
-      pos -= len;
-
-    // Aktuellen Abschnitt und Position darauf bestimmen
-    float remaining = reverse ? len - pos : pos;
-    for (uint8_t i = 1; i < n; i++) {
-      int dx = pts[i][0] - pts[i - 1][0];
-      int dy = pts[i][1] - pts[i - 1][1];
-      int leg = std::max(std::abs(dx), std::abs(dy));
-      if (remaining > leg && i < n - 1) {
-        remaining -= leg;
-        continue;
-      }
-      float t = leg > 0 ? remaining / leg : 0;
-      int x = pts[i - 1][0] + (int) (dx * t);
-      int y = pts[i - 1][1] + (int) (dy * t);
-      int8_t o = dy == 0 ? 0 : (dx == 0 ? 1 : 2);
-      if (o != orientation) {
-        orientation = o;
-        if (o == 0)
-          lv_obj_set_size(obj, 15, 4);
-        else if (o == 1)
-          lv_obj_set_size(obj, 4, 15);
-        else
-          lv_obj_set_size(obj, 8, 8);
-      }
-      int w = o == 0 ? 15 : (o == 1 ? 4 : 8);
-      int h = o == 0 ? 4 : (o == 1 ? 15 : 8);
-      lv_obj_set_pos(obj, x - w / 2, y - h / 2);
-      break;
-    }
-    set_visible(obj, true);
-  }
-};
-
-// Animationsgeschwindigkeit (Pixel pro Frame) abhängig von der Leistung
-inline float flow_speed(float watts, float threshold, float full_speed) {
-  if (watts <= threshold)
-    return 0;
-  float ratio = std::min(watts / full_speed, 1.0f);
-  return 1.0f + ratio * 4.0f;
-}
+inline float nz(float v) { return std::isnan(v) ? 0.0f : v; }
 
 // Aufteilung der aktuellen Leistung (W) auf die einzelnen Flüsse
 struct FlowSplit {
@@ -162,5 +75,110 @@ struct ActivityTracker {
 
 inline ActivityTracker gas_activity;
 inline ActivityTracker water_activity;
+
+// ---------------------------------------------------------------------------
+// Formatierung (deutsch, Komma als Dezimaltrenner)
+// ---------------------------------------------------------------------------
+inline void comma(char *s) {
+  for (; *s; s++)
+    if (*s == '.')
+      *s = ',';
+}
+
+// Leistung: "0 W", "740 W", "2,3 kW" (Betrag, Richtung zeigt die Anzeige)
+inline void fmt_power(char *buf, size_t n, float w) {
+  w = std::fabs(nz(w));
+  if (w < 15)
+    snprintf(buf, n, "0 W");
+  else if (w < 995)
+    snprintf(buf, n, "%d W", (int) lroundf(w / 10) * 10);
+  else {
+    snprintf(buf, n, "%.1f kW", w / 1000);
+    comma(buf);
+  }
+}
+
+inline void fmt_num(char *buf, size_t n, float v, int decimals, const char *unit) {
+  snprintf(buf, n, "%.*f%s", decimals, nz(v), unit);
+  comma(buf);
+}
+
+inline void fmt_clock(char *buf, size_t n, int minutes) {
+  minutes = ((minutes % 1440) + 1440) % 1440;
+  snprintf(buf, n, "%02d:%02d", minutes / 60, minutes % 60);
+}
+
+// ---------------------------------------------------------------------------
+// Uhrzeit aus ISO-8601 (z. B. Attribut next_rising von sun.sun, in UTC)
+// ---------------------------------------------------------------------------
+inline int64_t days_from_civil(int y, unsigned m, unsigned d) {
+  y -= m <= 2;
+  const int era = (y >= 0 ? y : y - 399) / 400;
+  const unsigned yoe = (unsigned) (y - era * 400);
+  const unsigned doy = (153 * (m + (m > 2 ? -3 : 9)) + 2) / 5 + d - 1;
+  const unsigned doe = yoe * 365 + yoe / 4 - yoe / 100 + doy;
+  return (int64_t) era * 146097 + (int64_t) doe - 719468;
+}
+
+// Liefert Unix-Zeit oder -1
+inline int64_t parse_iso(const std::string &s) {
+  int y, mo, d, h, mi, se;
+  if (sscanf(s.c_str(), "%d-%d-%dT%d:%d:%d", &y, &mo, &d, &h, &mi, &se) != 6)
+    return -1;
+  int64_t t = days_from_civil(y, mo, d) * 86400 + h * 3600 + mi * 60 + se;
+  // Zeitzonen-Versatz am Ende: +hh:mm / -hh:mm / Z
+  size_t p = s.find_last_of("+-");
+  if (p != std::string::npos && p > 10) {
+    int oh = 0, om = 0;
+    if (sscanf(s.c_str() + p + 1, "%d:%d", &oh, &om) >= 1) {
+      int off = oh * 3600 + om * 60;
+      t -= s[p] == '+' ? off : -off;
+    }
+  }
+  return t;
+}
+
+// ---------------------------------------------------------------------------
+// Akku-Prognose: "voll um ~14:30" / "reicht bis ~05:40"
+// power: + Entladen / - Laden (W), geglättet
+// ---------------------------------------------------------------------------
+inline void battery_eta(char *buf, size_t n, float soc, float power, float capacity_kwh, float reserve,
+                        int now_min) {
+  if (std::isnan(soc)) {
+    snprintf(buf, n, " ");
+    return;
+  }
+  if (soc >= 99.5f) {
+    snprintf(buf, n, "voll");
+    return;
+  }
+  if (power < -80) {
+    float hours = (100 - soc) / 100 * capacity_kwh / (-power / 1000);
+    if (hours > 12) {
+      snprintf(buf, n, "lädt langsam");
+      return;
+    }
+    char t[8];
+    fmt_clock(t, sizeof t, now_min + (int) (hours * 60));
+    snprintf(buf, n, "voll um ~%s", t);
+    return;
+  }
+  if (soc <= reserve + 1) {
+    snprintf(buf, n, "Reserve %d %%", (int) lroundf(soc));
+    return;
+  }
+  if (power > 80) {
+    float hours = (soc - reserve) / 100 * capacity_kwh / (power / 1000);
+    if (hours > 24) {
+      snprintf(buf, n, "reicht > 1 Tag");
+      return;
+    }
+    char t[8];
+    fmt_clock(t, sizeof t, now_min + (int) (hours * 60));
+    snprintf(buf, n, "reicht bis ~%s", t);
+    return;
+  }
+  snprintf(buf, n, "bereit");
+}
 
 }  // namespace dashboard

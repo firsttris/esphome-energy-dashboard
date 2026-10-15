@@ -1,0 +1,49 @@
+# Beispielwerte für die Vorschau. Szene per Umgebungsvariable DEMO_SCENE:
+# mittag (Standard), voll, abend, nacht
+
+esphome:
+  on_boot:
+    - priority: -100
+      then:
+        - delay: 300ms
+        - lambda: |-
+            struct Scene {
+              const char *name; int min; float pv, home, rod, bat, soc, boil;
+              float pv_day, hoy_day, fc, fc_tom, imp, exp, home_day, charge, discharge, rod_day, gas, water;
+            };
+            static const Scene scenes[] = {
+              {"mittag", 767, 8400, 3900, 2100, -2300, 78, 58, 18.2, 3.2, 38, 22, 3.9, 6.8, 14.6, 4.1, 3.4, 1.6, 0.62, 0.18},
+              {"voll",   872, 7600, 1100, 0, 0, 98.6, 65, 25.9, 3.8, 38, 22, 3.9, 12.1, 17.2, 7.2, 3.4, 3.5, 0.62, 0.24},
+              {"abend", 1215, 0, 1250, 0, 1250, 64, 61, 37.1, 4.7, 38, 22, 3.9, 19.6, 26.3, 7.2, 4.8, 3.5, 1.42, 0.31},
+              {"nacht",  150, 0, 450, 0, 0, 20, 49, 0, 0, 31, 22, 0.5, 0, 0.6, 0, 0.1, 0, 0.21, 0},
+            };
+            const char *want = getenv("DEMO_SCENE");
+            const Scene *s = &scenes[0];
+            for (auto &c : scenes)
+              if (want && strcmp(want, c.name) == 0)
+                s = &c;
+            auto &in = dash::in;
+            in.online = true;
+            id(ha_connected) = true;
+            in.pv = s->pv; in.home = s->home; in.rod = s->rod; in.bat = s->bat; in.soc = s->soc;
+            in.grid = s->home - s->pv - s->bat;
+            in.boiler_temp = s->boil;
+            in.pv_day = s->pv_day; in.hoy_day = s->hoy_day; in.forecast_today = s->fc; in.forecast_tomorrow = s->fc_tom;
+            in.import_day = s->imp; in.export_day = s->exp; in.home_day = s->home_day;
+            in.charge_day = s->charge; in.discharge_day = s->discharge; in.rod_day = s->rod_day;
+            in.gas_day = s->gas; in.water_day = s->water;
+            dashboard::water_activity.feed(0); dashboard::water_activity.feed(s->water);
+            dash::demo_minutes = s->min;
+            dash::shown.bat_slow = s->bat;
+            dash::demo_history(s->min);
+            lv_label_set_text(dash::ui.date, s->min < 400 ? "Do, 16. Okt" : "Mi, 15. Okt");
+            lv_obj_add_flag(id(loading_overlay), LV_OBJ_FLAG_HIDDEN);
+            dash::start_boot();
+        # "voll": Akku erreicht 100 % (Partikel-Burst)
+        - delay: 2500ms
+        - lambda: |-
+            const char *want = getenv("DEMO_SCENE");
+            if (want && strcmp(want, "voll") == 0) {
+              dash::in.soc = 100;
+              dash::in.grid = -6500;
+            }

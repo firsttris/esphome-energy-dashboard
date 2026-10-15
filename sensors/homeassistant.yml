@@ -10,6 +10,12 @@ sensor:
     entity_id: sensor.deye_wechselrichter_deye_tagliche_produktion
     internal: true
 
+  # Zweiter Wechselrichter (optional, z. B. Hoymiles über OpenDTU); wird zu PV addiert
+  - platform: homeassistant
+    id: solar_power_2
+    entity_id: sensor.hoymiles_tagesertrag
+    internal: true
+
   - platform: homeassistant
     id: grid_power
     entity_id: sensor.deye_wechselrichter_deye_taglich_energie_bezogen
@@ -55,6 +61,23 @@ sensor:
     entity_id: sensor.ac_elwa_2_energy_consumption_daily
     internal: true
 
+  # PV-Prognose (kWh), z. B. Forecast.Solar
+  - platform: homeassistant
+    id: pv_forecast_today
+    entity_id: sensor.pv_prognose_heute
+    internal: true
+
+  - platform: homeassistant
+    id: pv_forecast_tomorrow
+    entity_id: sensor.pv_prognose_morgen
+    internal: true
+
+  # Warmwasser-Temperatur (°C) für den Heizstab-Knoten
+  - platform: homeassistant
+    id: boiler_temperature
+    entity_id: sensor.ac_elwa_2_temperatur_1
+    internal: true
+
   # Aktuelle Leistungswerte (W) - steuern die Fluss-Animationen
   - platform: homeassistant
     id: current_home_consumption
@@ -73,11 +96,6 @@ sensor:
     internal: true
 
   - platform: homeassistant
-    id: current_pv_surplus
-    entity_id: sensor.aktueller_pv_uberschuss
-    internal: true
-
-  - platform: homeassistant
     id: current_heating_rod_power
     entity_id: sensor.ac_elwa_2_power_elwa_2
     internal: true
@@ -86,6 +104,20 @@ sensor:
     id: current_battery_power
     # Positiv = Entladen, negativ = Laden
     entity_id: sensor.deye_wechselrichter_deye_batterie_leistung
+    internal: true
+
+# Sonnenauf- und -untergang für den Sonnenbogen
+text_sensor:
+  - platform: homeassistant
+    id: sun_next_rising
+    entity_id: sun.sun
+    attribute: next_rising
+    internal: true
+
+  - platform: homeassistant
+    id: sun_next_setting
+    entity_id: sun.sun
+    attribute: next_setting
     internal: true
 
 # Zeit von Home Assistant

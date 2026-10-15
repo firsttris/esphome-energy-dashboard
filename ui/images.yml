@@ -1,0 +1,16 @@
+# Vorgerenderte Bilder (erzeugt mit tools/make_images.py)
+# Weicher Schein und runde Masken als fertige PNGs: LVGL muss nur kopieren.
+
+image:
+  - { platform: file, file: images/dot_pv.png, id: img_dot_pv, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: images/dot_grid.png, id: img_dot_grid, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: images/dot_exp.png, id: img_dot_exp, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: images/dot_bat.png, id: img_dot_bat, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: images/dot_boil.png, id: img_dot_boil, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: images/dot_white.png, id: img_dot_white, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: images/sun.png, id: img_sun, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: images/moon.png, id: img_moon, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: images/home_glow.png, id: img_home_glow, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: images/wave_front.png, id: img_wave_front, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: images/wave_back.png, id: img_wave_back, type: RGB565, transparency: alpha_channel }
+  - { platform: file, file: images/bat_mask.png, id: img_bat_mask, type: RGB565, transparency: alpha_channel }

@@ -1,0 +1,65 @@
+name: Screenshots
+
+# Baut die SDL-Vorschau mit Beispielwerten, macht Bilder aller Szenen und der
+# Seite "Heute" plus ein GIF und legt sie in docs/ ab. Haben sie sich geändert,
+# werden sie committet (docs/ löst keinen neuen Lauf aus).
+on:
+  push:
+    branches: [main]
+    paths-ignore:
+      - "**.md"
+      - "docs/**"
+      - "LICENSE"
+  workflow_dispatch:
+
+concurrency:
+  group: screenshots
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+
+jobs:
+  screenshots:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install tools
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends libsdl2-dev xvfb imagemagick xdotool ffmpeg
+          pip install esphome
+
+      - name: Cache ESPHome toolchain
+        uses: actions/cache@v4
+        with:
+          path: ~/.platformio
+          key: pio-host-${{ runner.os }}-${{ hashFiles('**/*.yml') }}
+          restore-keys: pio-host-${{ runner.os }}-
+
+      - name: Render
+        run: |
+          GIF=1 FPS=false sh preview/render.sh
+
+      - name: Copy to docs
+        run: |
+          mkdir -p docs
+          cp preview/shots/mittag.png preview/shots/voll.png preview/shots/abend.png \
+             preview/shots/nacht.png preview/shots/heute.png preview/shots/demo.gif docs/
+
+      - name: Commit if changed
+        run: |
+          git add docs
+          if git diff --cached --quiet; then
+            echo "Screenshots unverändert"
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "docs: Screenshots aktualisieren"
+          git push

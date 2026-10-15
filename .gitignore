@@ -4,3 +4,5 @@
 /.esphome/
 /secrets.yaml
 /.env
+/.preview.yml
+/preview/shots/

@@ -75,6 +75,11 @@ touchscreen:
     i2c_id: touchscreen_bus
     on_touch:
       then:
+        # Ohne Schiebe-Animation: die würde den ganzen Bildschirm pro Bild neu zeichnen
         - lvgl.page.next:
-            animation: move_left
-            time: 300ms
+            animation: NONE
+        - lambda: dash::on_page_change();
+
+# Panel ist um 270° gedreht eingebaut
+lvgl:
+  rotation: 270

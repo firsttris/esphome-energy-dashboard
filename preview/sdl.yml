@@ -1,0 +1,42 @@
+# Desktop-Vorschau: ersetzt base/hardware.yml, network.yml und backlight.yml,
+# läuft als SDL-Fenster am PC (siehe preview/render.sh)
+
+host:
+
+api:
+  reboot_timeout: 0s
+
+logger:
+  level: INFO
+
+display:
+  - platform: sdl
+    id: tft_display
+    dimensions:
+      width: 480
+      height: 480
+    update_interval: never
+    auto_clear_enabled: false
+
+touchscreen:
+  - platform: sdl
+    id: tft_touch
+    display: tft_display
+    on_touch:
+      then:
+        - lvgl.page.next:
+            animation: NONE
+        - lambda: dash::on_page_change();
+
+output:
+  - platform: template
+    id: backlight_output
+    type: float
+    write_action:
+      - lambda: ""
+
+light:
+  - platform: monochromatic
+    id: display_backlight
+    output: backlight_output
+    restore_mode: ALWAYS_ON

@@ -4,30 +4,39 @@
 
 **Visualize Your Home's Energy Flow in Real-Time!**
 
-<img src="docs/hero.svg" width="100%" alt="Energy Dashboard: energy flow page and current power table">
+<img src="docs/demo.gif" width="360" alt="Energy Dashboard: start animation and live energy flow">
 
 [![ESPHome](https://img.shields.io/badge/ESPHome-Compatible-blue?logo=esphome)](https://esphome.io/)
 [![Home Assistant](https://img.shields.io/badge/Home%20Assistant-Integration-41BDF5?logo=homeassistant)](https://www.home-assistant.io/)
 [![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Build](https://github.com/firsttris/esphome-energy-dashboard/actions/workflows/build.yml/badge.svg)](https://github.com/firsttris/esphome-energy-dashboard/actions/workflows/build.yml)
 
-A modular ESPHome project that visualizes daily energy distribution similar to Home Assistant, with real-time data on solar production, grid consumption/feed-in, battery status, and gas consumption, on the [Guition-ESP32-S3-4848S040](https://devices.esphome.io/devices/guition-esp32-s3-4848s040/) display.
+A modular ESPHome project that shows your home's live energy flow on the [Guition-ESP32-S3-4848S040](https://devices.esphome.io/devices/guition-esp32-s3-4848s040/) display: solar, grid, battery, hot water, gas and water, with data from Home Assistant.
 
 ---
 
 </div>
 
+| Midday · feed-in | Battery full | Evening · battery | Night · grid | Today |
+|:---:|:---:|:---:|:---:|:---:|
+| <img src="docs/mittag.png" width="170"> | <img src="docs/voll.png" width="170"> | <img src="docs/abend.png" width="170"> | <img src="docs/nacht.png" width="170"> | <img src="docs/heute.png" width="170"> |
+
+<sub>Screenshots and GIF are rendered with example values by CI from the desktop preview (`preview/`).</sub>
+
 ## 📱 Features
 
-- **🔄 Energy Flow Visualization**: See your energy distribution at a glance – flows animate only while power is actually flowing, and faster the more power flows
-- **☀️ Solar Production Monitoring**: Track your daily solar generation
-- **🔋 Battery Status**: Real-time battery state of charge
-- **📊 Dual Page Display**: 
-  - Page 1: Daily accumulated energy consumption (Home Assistant style)
-  - Page 2: Current load table with detailed breakdown
-- **👆 Touch Interface**: Simply tap the screen to switch between views
+- **🔄 Live energy flow**: Glowing comets travel along the lines – more and faster comets the more power flows. Idle lines fade into the background
+- **🏠 Home in the center**: Live consumption in large digits, a ring showing where today's energy came from (PV / battery / grid) and today's self-sufficiency
+- **🔋 Liquid battery**: The state of charge is a moving wave, bubbles rise while charging, plus a forecast like *full at ~14:30* or *lasts until ~05:40*
+- **☀️ Sun arc**: The sun (or moon) moves across the sky between sunrise and sunset; the ring around PV shows today's yield against the PV forecast
+- **🎨 Mood**: The sky turns golden while feeding in, magenta on battery and blue on grid power
+- **💶 Money**: How much your PV saved today, based on your electricity prices
+- **💡 Hints**: e.g. *2.2 kW surplus · good moment for the washing machine*
+- **♨️ Hot water**: Tank colored by temperature, sparks rise while the heating rod runs
+- **🎉 Moments**: A short particle burst when the battery reaches 100 %
+- **📈 Page "Today"**: PV, consumption and battery over the day (15-min values, kept across reboots)
+- **⚡ Smooth on the ESP32-S3**: Glow and masks are pre-rendered images, only small objects move. An FPS counter (fps · ms per frame · share of screen redrawn) can be shown bottom left
 - **📡 Offline Indicator**: A small cloud icon shows when Home Assistant is disconnected
-- **🎨 Modular Design**: Easy to customize and extend
 
 ## 📋 Prerequisites
 
@@ -85,6 +94,10 @@ Ensure that the entity IDs in [sensors/homeassistant.yml](sensors/homeassistant.
 | `battery_charge` / `battery_discharge` | 🔋 Battery charged / discharged today (kWh) | `sensor.deye_wechselrichter_deye_tagliche_batterie_ladung` |
 | `gas_power` / `water_power` | 🔥💧 Gas / water today (m³) | `sensor.gas_tagesverbrauch` |
 | `heating_rod_daily_energy` | ♨️ Heating rod today (kWh) | `sensor.ac_elwa_2_energy_consumption_daily` |
+| `solar_power_2` | ☀️ Second inverter today (kWh), optional | `sensor.hoymiles_tagesertrag` |
+| `pv_forecast_today` / `pv_forecast_tomorrow` | ☀️ PV forecast (kWh), e.g. Forecast.Solar | `sensor.pv_prognose_heute` |
+| `boiler_temperature` | ♨️ Hot water temperature (°C) | `sensor.ac_elwa_2_temperatur_1` |
+| `sun_next_rising` / `sun_next_setting` | 🌅 Sun arc (attributes of `sun.sun`) | `sun.sun` |
 
 **Current power** (drives the flow animations and the power table):
 
@@ -94,7 +107,6 @@ Ensure that the entity IDs in [sensors/homeassistant.yml](sensors/homeassistant.
 | `current_grid_power` | 🔌 Grid power (W) | **positive = import, negative = feed-in** |
 | `current_battery_power` | 🔋 Battery power (W) | **positive = discharging, negative = charging** |
 | `current_home_consumption` | 🏠 Home consumption (W) | |
-| `current_pv_surplus` | ☀️ PV surplus (W) | |
 | `current_heating_rod_power` | ♨️ Heating rod (W) | |
 
 > **⚠️ Sign conventions:** If your inverter reports grid or battery power the other way round, add a `multiply: -1` filter to that sensor.
@@ -127,6 +139,10 @@ The `substitutions` at the top of [main.yml](main.yml) control the behaviour:
 |--------------|---------|-------------|
 | `flow_threshold_w` | `20` | Minimum power (W) before a flow is animated |
 | `flow_full_speed_w` | `5000` | Power (W) at which the animation reaches full speed |
+| `battery_capacity_kwh` | `9.0` | Usable battery capacity for *full at* / *lasts until* |
+| `battery_reserve_soc` | `20` | Minimum state of charge (%) the battery discharges to |
+| `price_import` / `price_export` | `0.2957` / `0.0786` | Electricity price and feed-in tariff (€/kWh) for *saved today* |
+| `show_fps` | `true` | FPS counter bottom left: fps · ms per frame (copy to display) · share of the screen redrawn |
 
 ### ⚡ Step 4: Compile and Flash Firmware
 
@@ -264,18 +280,20 @@ After successful startup, the display shows a loading screen followed by the mai
 
 | View | Description |
 |------|-------------|
-| **📊 Dashboard** | Overview with energy flow diagrams and current values |
-| **📋 Power Table** | Detailed table showing the current load |
+| **⚡ Energy flow** | Live power of PV, grid, battery, home and heating rod with animated flows |
+| **📈 Today** | Today's totals and the day's course of PV, consumption and battery |
 
 ### 🧭 Reading the Dashboard
 
 | Element | Meaning |
 |---------|---------|
-| **Circles** | Today's totals: PV, grid import (→) / feed-in (←), battery charged (↓) / discharged (↑), home, heating rod, gas and water |
-| **Moving segments** | Current power flow; the faster, the more power. No segment = less than `flow_threshold_w` |
+| **Large numbers** | Current power. Grid: purple = feed-in, blue = import |
+| **Comets** | Current power flow; more and faster comets = more power. None = less than `flow_threshold_w` |
 | **Ring around the home** | Where today's consumption came from: PV (yellow), battery (pink), grid (blue) |
-| **Battery arc** | State of charge |
-| **Red cloud (top left)** | Home Assistant is not connected, values may be outdated |
+| **Ring around PV** | Today's yield compared to the forecast |
+| **Battery wave** | State of charge, `+` charging / `−` discharging |
+| **Sky color** | Golden = feed-in, magenta = battery supplies the home, blue = grid import |
+| **Red cloud (top)** | Home Assistant is not connected, values may be outdated |
 
 ### 💡 Additional Features
 
@@ -295,8 +313,10 @@ The configuration is modular for easy customization:
 | 🌐 [base/network.yml](base/network.yml) | WiFi, API, OTA configuration |
 | 💡 [base/backlight.yml](base/backlight.yml) | Backlight |
 | 📊 [sensors/homeassistant.yml](sensors/homeassistant.yml) | Home Assistant sensor imports |
-| 🎨 [ui/*.yml](ui/) | UI components (fonts, layout, animations, pages) |
-| 🔗 [ui/bindings.yml](ui/bindings.yml) | Which sensor updates which label |
+| 🎨 [ui/scene.h](ui/scene.h) | The whole UI in C++ (LVGL 9): nodes, flows, battery, sky, page "Today", FPS |
+| 🧮 [ui/dashboard.h](ui/dashboard.h) | Logic without LVGL: flow split, formatting, battery forecast |
+| 🔗 [ui/bindings.yml](ui/bindings.yml) | Passes sensor values to the UI |
+| 🖼️ [images/](images/) | Pre-rendered glow, sun, moon and battery images ([tools/make_images.py](tools/make_images.py)) |
 
 ### 📂 File Structure
 
@@ -313,18 +333,30 @@ The configuration is modular for easy customization:
 ├── sensors/
 │   └── homeassistant.yml       # HA sensor definitions (entity IDs)
 ├── ui/
-│   ├── animations.yml          # Energy flow animations
-│   ├── bindings.yml            # Sensor -> label updates, clock, home ring
-│   ├── dashboard.h             # C++ helpers for animations
-│   ├── fonts.yml               # Font definitions
-│   ├── layout.yml              # Layout configuration
-│   ├── loading.yml             # Loading screen & connection status
-│   ├── page_dashboard.yml      # Main dashboard page
-│   ├── page_power_table.yml    # Power table page
-│   └── widgets/                # Reusable widget templates
+│   ├── scene.h                 # UI (LVGL): energy flow page, page "Today", FPS
+│   ├── dashboard.h             # Logic: flow split, formatting, battery forecast
+│   ├── bindings.yml            # Sensor values -> UI
+│   ├── fonts.yml               # Fonts (Barlow Semi Condensed, MDI icons)
+│   ├── images.yml              # Pre-rendered images
+│   ├── layout.yml              # LVGL setup, pages, timers
+│   └── loading.yml             # Loading screen & connection status
+├── images/                     # Glow, sun, moon, battery wave and mask (PNG)
+├── tools/make_images.py        # Generates images/
+├── preview/                    # Desktop preview (SDL) with example values
 ├── fonts/                      # Font files
-└── docs/                       # Documentation & screenshots
+└── docs/                       # Screenshots (rendered by CI)
 ```
+
+## 🖥️ Desktop Preview
+
+`preview/` builds the dashboard for the PC (SDL) with example values for four scenes (midday, battery full, evening, night). It needs ESPHome, SDL2, Xvfb, xdotool, ImageMagick and ffmpeg:
+
+```bash
+sh preview/render.sh          # screenshots in preview/shots/
+GIF=1 sh preview/render.sh    # plus an animated GIF
+```
+
+The workflow [screenshots.yml](.github/workflows/screenshots.yml) does the same on every push to `main` and commits the images in `docs/`.
 
 ## 📚 Further Resources
 
