@@ -1,38 +1,46 @@
 # Schriften: Barlow Semi Condensed (schmal, gut lesbare Ziffern) und MDI-Symbole
+# bpp: 4 = Kantenglättung mit 16 Stufen (ohne wirken Schrift und Icons treppig).
 
 font:
   - file: { type: gfonts, family: Barlow Semi Condensed, weight: 600 }
     id: font_32b
+    bpp: 4
     size: 32
     glyphs: &digits " +,-.0123456789:%WkM−"
 
   - file: { type: gfonts, family: Barlow Semi Condensed, weight: 700 }
     id: font_24b
+    bpp: 4
     size: 24
     glyphs: &latin " !\"#$%&'()*+,-./0123456789:;<=>?@ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~°²³ÄÖÜäöüß€·–−"
 
   - file: { type: gfonts, family: Barlow Semi Condensed, weight: 600 }
     id: font_20b
+    bpp: 4
     size: 20
     glyphs: *latin
 
   - file: { type: gfonts, family: Barlow Semi Condensed, weight: 500 }
     id: font_14
+    bpp: 4
     size: 14
     glyphs: *latin
 
   - file: { type: gfonts, family: Barlow Semi Condensed, weight: 500 }
     id: font_12
+    bpp: 4
     size: 12
     glyphs: *latin
 
   - file: { type: gfonts, family: Barlow Semi Condensed, weight: 600 }
     id: font_10b
+    bpp: 4
     size: 10
     glyphs: *latin
 
   - file: "fonts/materialdesignicons-webfont.ttf"
     id: icons_32
+    bpp: 4
     size: 32
     glyphs: [
       "\U000F0A72",  # solar-power (Ladebildschirm)
@@ -40,6 +48,7 @@ font:
 
   - file: "fonts/materialdesignicons-webfont.ttf"
     id: icons_20
+    bpp: 4
     size: 20
     glyphs: [
       "\U000F0238",  # fire (Gas)
@@ -49,6 +58,7 @@ font:
 
   - file: "fonts/materialdesignicons-webfont.ttf"
     id: icons_16
+    bpp: 4
     size: 16
     glyphs: [
       "\U000F0045",  # arrow-down (Bezug)
