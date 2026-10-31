@@ -44,7 +44,7 @@ A modular ESPHome project that shows your home's live energy flow on the [Guitio
 |-------------|-------------|
 | **🔧 Hardware** | [Guition-ESP32-S3-4848S040](https://devices.esphome.io/devices/guition-esp32-s3-4848s040/) (ESP32-S3 with 4.8" IPS touch display) |
 | **🏠 Home Assistant** | With ESPHome Integration for sensor data |
-| **💻 Software** | ESPHome (local or Docker/Podman) |
+| **💻 Software** | ESPHome (local or Docker/Podman). CI builds with the release pinned in [`requirements.txt`](requirements.txt) (`pip install -r requirements.txt`), and `docker-compose.yml` runs the same one; Renovate updates both |
 | **🔌 Cable** | USB cable for initial flashing |
 
 ---
@@ -326,6 +326,7 @@ The configuration is modular for easy customization:
 ├── secrets.yaml                # Your credentials (not in git)
 ├── secrets.example.yaml        # Template for secrets.yaml
 ├── docker-compose.yml          # Docker setup
+├── requirements.txt            # The pinned ESPHome release (CI, pip)
 ├── base/
 │   ├── hardware.yml            # Display & hardware config
 │   ├── network.yml             # Network settings
